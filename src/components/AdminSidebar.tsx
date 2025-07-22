@@ -8,6 +8,7 @@ const AdminSidebar = ({ onSignOut }: { onSignOut: () => void }) => {
   const navItems = [
     { href: '/admin/create-post', label: 'Create New Post' },
     { href: '/admin/banner-update', label: 'Banner Update' },
+     { href: '/admin/create-prediction', label: 'Banner Update' },
   ];
 
   return (

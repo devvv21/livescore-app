@@ -86,7 +86,7 @@ export async function POST(request: Request) {
         return NextResponse.json(formattedMatch, { status: 201 });
 
     } catch (error: any) {
-        console.error("API Error (POST /api/admin/matches):", error);
+        console.error("API Error (POST /api/matches):", error);
         // Handle potential duplicate entry errors or other validation issues
         if (error.code === 11000) { // Example for duplicate key error (if unique index exists)
             return NextResponse.json({ message: 'Match already exists', error: error.message }, { status: 409 });

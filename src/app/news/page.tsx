@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 
   // Canonical URL to define the authoritative page for search engines.
   alternates: {
-    canonical: 'https://www.todaylivescores.com/news', // Assuming your page route is /news
+    canonical: 'https://todaylivescores.com/news', // Assuming your page route is /news
   },
 
   // Open Graph tags for optimized sharing on social platforms like Facebook.

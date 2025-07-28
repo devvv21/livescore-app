@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? article.creator 
     : ['TLiveScores Staff'];
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://todaylivescores.com/';
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://todaylivescores.com/';
   const canonicalUrl = `${siteUrl}/news/${article.slug}`;
   const imageUrl = article.image_url || `${siteUrl}/default-social-card.png`;
 

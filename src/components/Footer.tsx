@@ -50,7 +50,7 @@ const Footer = () => {
           <div>
             <h2 className="text-lg font-bold text-white mb-4">Legal</h2>
             <ul className="space-y-3"> {/* Increased vertical spacing */}
-              <li><a href="/term-of-use" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Use</a></li>
+              <li><a href="/terms-of-use" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Use</a></li>
               <li><a href="/privacy-policy" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a></li>
             </ul>
           </div>

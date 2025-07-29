@@ -8,7 +8,6 @@ import { Match, LeagueGroup, Standing, Player, ApiFixture, ApiOdd, ApiStanding, 
 import { format } from 'date-fns';
 import { Highlight, Lineup, MatchLineupData } from './types';
 import { groupMatchesByLeague, mapApiFixtureToMatch } from './apiUtils';
-import LeagueListCacheModel from '@/models/LeagueListCache';
 
 
 // ==================================================================
@@ -313,86 +312,22 @@ export const fetchAllTeamsInLeague = cache(async (leagueId: string, season: stri
     return [];
   }
 });
-export const fetchAllTeamsFromAllLeagues = cache(async (): Promise<{ leagueName: string, teams: Team[] }[]> => {
-    if (!FOOTBALL_API_KEY) {
-        console.error("API Error: Football API Key is not configured.");
-        return [];
-    }
-    
-    await dbConnect();
-
-    const CACHE_DURATION_IN_HOURS = 24; // Cache the full list for one day
-    const now = new Date();
-
-    // 1. Check for the cached document in our database first
-    const cachedList = await LeagueListCacheModel.findOne({ identifier: 'all-leagues' });
-
-    if (cachedList) {
-        const ageInHours = (now.getTime() - new Date(cachedList.lastUpdated).getTime()) / (1000 * 60 * 60);
-        // If the cache is fresh, return it immediately
-        if (ageInHours < CACHE_DURATION_IN_HOURS) {
-            console.log("[CACHE HIT] Serving full league list from database.");
-            return cachedList.leagueData;
-        }
-        console.log("[CACHE STALE] Full league list is outdated. Fetching from API.");
-    } else {
-        console.log("[CACHE MISS] Full league list not found in database. Fetching from API.");
-    }
-
-    // 2. If cache is missing or stale, proceed to fetch everything from the API
+export const fetchAllTeamsFromAllLeagues = cache(async (): Promise<{ leagueName: string, teams: { id: number, name: string, logo: string }[] }[]> => {
+    if (!FOOTBALL_API_KEY) return [];
     try {
-        console.log("[Dynamic Fetch] Step 1: Fetching all available leagues from API...");
-        const leaguesResponse = await fetch(`${FOOTBALL_API_URL}/leagues`, footballServerOptions);
-        if (!leaguesResponse.ok) throw new Error("Failed to fetch leagues list.");
-        const leaguesData = await leaguesResponse.json();
-
-        const filteredLeagues = (leaguesData.response || []).filter((item: any) => {
-            const isActive = item.seasons.some((s: any) => s.current === true);
-            const isTopTier = ['League', 'Cup'].includes(item.league.type);
-            const isWellKnown = item.league.name.includes("Champions") || item.league.name.includes("Europa") || ['England', 'Spain', 'Germany', 'Italy', 'France', 'USA', 'Portugal', 'Netherlands'].includes(item.country.name);
-            return isActive && isTopTier && isWellKnown;
+        const leagueIds = [39, 140, 135, 78, 61, 2, 3, 88, 94, 253];
+        const leagueDetailsPromises = leagueIds.map(id => fetch(`${FOOTBALL_API_URL}/leagues?id=${id}`, footballServerOptions).then(res => res.ok ? res.json() : null));
+        const leagueDetailsResults = await Promise.all(leagueDetailsPromises);
+        const leaguesMap = new Map(leagueDetailsResults.filter(Boolean).map(result => [result.response[0].league.id, result.response[0].league.name]));
+        const teamsPromises = leagueIds.map(id => fetch(`${FOOTBALL_API_URL}/teams?league=${id}&season=2024`, footballServerOptions).then(res => res.ok ? res.json() : null));
+        const teamsResults = await Promise.all(teamsPromises);
+        return teamsResults.filter(Boolean).map(result => {
+            const leagueId = result.parameters.league;
+            const leagueName = leaguesMap.get(parseInt(leagueId)) || 'Unknown League';
+            const teams = result.response.map((item: any) => ({ id: item.team.id, name: item.team.name, logo: item.team.logo }));
+            return { leagueName, teams };
         });
-
-        const leagueIds = filteredLeagues.map((item: any) => item.league.id);
-        const leaguesMap = new Map(filteredLeagues.map((item: any) => [item.league.id, item.league.name]));
-        console.log(`[Dynamic Fetch] Step 2: Filtered down to ${leagueIds.length} relevant leagues.`);
-        
-        const season = new Date().getFullYear();
-        const allLeaguesPromises = leagueIds.map(async (id: number) => {
-            const leagueName = leaguesMap.get(id) || 'Unknown League';
-            const teams = await fetchAllTeamsInLeague(id.toString(), season.toString());
-            if (teams.length > 0) return { leagueName, teams };
-            return null;
-        });
-
-        let allLeaguesData = (await Promise.all(allLeaguesPromises))
-            .filter(Boolean)
-            .sort((a, b) => a!.leagueName.localeCompare(b!.leagueName)) as { leagueName: string, teams: Team[] }[];
-
-        // 3. Save the fresh data to our database cache
-        if (allLeaguesData.length > 0) {
-            console.log(`[DB SAVE] Saving new list of ${allLeaguesData.length} leagues to the cache.`);
-            await LeagueListCacheModel.findOneAndUpdate(
-                { identifier: 'all-leagues' },
-                {
-                    leagueData: allLeaguesData,
-                    lastUpdated: now,
-                },
-                { upsert: true, new: true } // Create if doesn't exist, update if it does
-            );
-        }
-
-        return allLeaguesData;
-
-    } catch (error) { 
-        console.error("A critical error occurred in fetchAllTeamsFromAllLeagues:", error);
-        // If the API fails but we have old, stale data, it's better to return that than nothing.
-        if (cachedList) {
-            console.warn("API fetch failed. Serving stale data from cache as a fallback.");
-            return cachedList.leagueData;
-        }
-        return []; 
-    }
+    } catch (error) { return []; }
 });
 export const fetchTeamOfTheWeek = cache(async (leagueId: string = "39", season: string = "2024"): Promise<Player[]> => {
     if (!FOOTBALL_API_KEY) return [];

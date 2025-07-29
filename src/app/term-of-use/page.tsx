@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://todaylivescores.com/terms-of-use',
+    canonical: 'https://todaylivescores.com/term-of-use',
   },
 };
 

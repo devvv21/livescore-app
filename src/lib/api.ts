@@ -8,12 +8,10 @@ import { Match, LeagueGroup, Standing, Player, ApiFixture, ApiOdd, ApiStanding, 
 import { format } from 'date-fns';
 import { Highlight, Lineup, MatchLineupData } from './types';
 import { groupMatchesByLeague, mapApiFixtureToMatch } from './apiUtils';
-<<<<<<< HEAD
+
 import LeagueListCacheModel from '@/models/LeagueListCache';
 import { Player } from '@/data/mockData';
-=======
 
->>>>>>> c16423cbe6efff4ab705e60be45b8e181418f961
 
 // ==================================================================
 // === FOOTBALL API CONFIGURATION (No Changes)                    ===

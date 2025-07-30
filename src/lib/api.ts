@@ -9,13 +9,89 @@ import { format } from 'date-fns';
 import { Highlight, Lineup, MatchLineupData } from './types';
 import { groupMatchesByLeague, mapApiFixtureToMatch } from './apiUtils';
 import LeagueListCacheModel from '@/models/LeagueListCache';
-
+import { Player } from '@/data/mockData';
 
 // ==================================================================
 // === FOOTBALL API CONFIGURATION (No Changes)                    ===
 // ==================================================================
 const FOOTBALL_API_URL = 'https://v3.football.api-sports.io';
 const FOOTBALL_API_KEY = process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
+
+export const fetchAllPlayersInLeague = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
+  if (!FOOTBALL_API_KEY) return [];
+
+  try {
+    const teamsResponse = await fetch(
+      `${FOOTBALL_API_URL}/teams?league=${leagueId}&season=${season}`, 
+      // Add cache option here
+      { ...footballServerOptions, cache: 'no-store' }
+    );
+
+    if (!teamsResponse.ok) {
+      console.error('Failed to fetch teams');
+      return [];
+    }
+
+    const teamsData = await teamsResponse.json();
+    const teams = teamsData.response || [];
+
+    if (teams.length === 0) return [];
+    
+    const allSquadPromises = teams.map((team: any) => 
+        fetch(
+          `${FOOTBALL_API_URL}/players/squads?team=${team.team.id}`, 
+          // And here as well
+          { ...footballServerOptions, cache: 'no-store' }
+        ).then(res => res.json())
+    );
+
+    const allSquadResults = await Promise.all(allSquadPromises);
+    
+    let allPlayers: any[] = [];
+    allSquadResults.forEach((squadResult, index) => {
+        const teamInfo = teams[index].team;
+        const players = squadResult.response?.[0]?.players || [];
+        const playersWithTeamInfo = players.map((player: any) => ({
+            ...player,
+            team: { id: teamInfo.id, name: teamInfo.name, logo: teamInfo.logo }
+        }));
+        allPlayers = [...allPlayers, ...playersWithTeamInfo];
+    });
+
+    allPlayers.sort((a, b) => a.name.localeCompare(b.name));
+    
+    return allPlayers;
+
+  } catch (error) {
+    console.error("Error in fetchAllPlayersInLeague:", error);
+    return [];
+  }
+});
+
+export const fetchInjuriesFromApi = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
+    if (!FOOTBALL_API_KEY) return [];
+
+    try {
+        const url = `${FOOTBALL_API_URL}/injuries?league=${leagueId}&season=${season}`;
+        const response = await fetch(
+          url,
+          // Add the cache option to the problematic fetch call
+          { ...footballServerOptions, cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+            console.error(`[API Error] Failed to fetch injuries for league: ${leagueId}`);
+            return [];
+        }
+
+        const data = await response.json();
+        return data.response || [];
+
+    } catch (error) {
+        console.error("Error in fetchInjuriesFromApi:", error);
+        return [];
+    }
+});
 
 const footballServerOptions: RequestInit = {
   method: 'GET',

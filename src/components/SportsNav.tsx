@@ -21,6 +21,7 @@ const SportsNav = ({ liveMatchCount }: SportsNavProps) => {
     { name: 'Sport Highlights', href: '/highlights', icon: <Trophy size={18} /> },
     // Changed icon from Trophy to TrendingUp for better representation
     { name: 'Predictions', href: '/predictions', icon: <TrendingUp size={18} /> },
+    { name: 'Football Scout', href: '/football-scout', icon: <FileText size={18} /> },
     { name: 'News', href: '/news', icon: <Newspaper size={18} /> },
     // Changed icon from Newspaper to FileText to differentiate from News
     { name: 'Blogs', href: '/blog', icon: <FileText size={18} /> },

@@ -23,8 +23,8 @@ import PredictionMatchCard from '@/components/predictions/PredictionMatchCard';
 
 // --- SEO Metadata for the Predictions Page ---
 export const metadata: Metadata = {
-  title: 'Daily Match Predictions',
-  description: 'Get daily match predictions and odds for upcoming football fixtures from around the world. In-depth analysis for your favorite leagues.',
+  title: 'TodayLiveScores | Daily Match Predictions',
+  description: 'Get daily match predictions at Today Live Scores and odds for upcoming football fixtures from around the world. In-depth analysis for your favorite leagues.',
   keywords: ['match predictions', 'football odds', 'daily fixtures', 'sports betting tips'],
   alternates: {
     canonical: 'https://todaylivescores.com/predictions',

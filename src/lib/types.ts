@@ -3,6 +3,31 @@
 // --- EXISTING TYPES (No Changes) ---
 
 // For the news listing page
+export const injuryStatuses = [
+  'Injured', 
+  'Doubt', 
+  'Knock', 
+  'Disciplinary', 
+  'On Loan', 
+  'Unavailable'
+];
+
+// A plain interface for our injury data structure
+export interface IInjuryData {
+  _id: any;
+  playerId: number;
+  playerName: string;
+  playerPhoto: string;
+  teamId: number;
+  teamName: string;
+  teamLogo: string;
+  status: string;
+  details: string;
+  returnDate: string;
+  lastUpdated: Date | string;
+  isApiEntry?: boolean;
+}
+
 export interface NewsArticleSummary {
   id: string;
   slug: string;

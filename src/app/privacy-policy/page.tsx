@@ -4,9 +4,9 @@ import SportsNav from '@/components/SportsNav';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Today Live Scores | Privacy Policy',
+  title: 'TodayLiveScores | Privacy Policy',
   description: 'Read the Today Live Scores Privacy Policy to learn how we protect your data and ensure your privacy while using our sports score services.',
-  keywords: ['Privacy Policy', 'Today Live Scores', 'POPIA', 'User Rights', 'Data Protection'],
+  keywords: ['Privacy Policy'],
   authors: [{ name: 'TodayLiveScores' }],
   publisher: 'TodayLiveScores',
   robots: {

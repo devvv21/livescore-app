@@ -1,4 +1,5 @@
-import { fetchInjuriesFromApi, fetchTeamOfTheWeek, fetchTopLeagues } from "@/lib/api"; 
+
+          import { fetchInjuriesFromApi, fetchTeamOfTheWeek, fetchTopLeagues } from "@/lib/api";
 import { fetchNewsList } from "@/lib/news-api";
 import InjuryModel from "@/models/Injury";
 import dbConnect from "@/lib/mongodb";
@@ -9,7 +10,10 @@ import SportsNav from "@/components/SportsNav";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebarNews from "@/components/RightSideBarNews";
 import PublicInjuriesTable from "@/components/PublicInjuriesTable";
-import { Metadata } from 'next';
+import RelatedPosts from "@/components/RelatedPosts";
+import Post from "@/models/Post";
+import { IPost } from "@/models/Post";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: 'TodayLiveScores | Football scout',
@@ -26,27 +30,39 @@ export const metadata: Metadata = {
   },
 };
 
+async function getRelatedPosts(): Promise<IPost[]> {
+  await dbConnect();
+  const posts = await Post.find({})
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .select("title slug featuredImageUrl createdAt")
+    .lean();
+  return posts as IPost[];
+}
+
 export default async function InjuriesPage() {
   await dbConnect();
 
   const [
-    manualInjuries, 
+    manualInjuries,
     apiInjuriesResponse,
     teamOfTheWeek,
     allNews,
-    topLeagues
+    topLeagues,
+    relatedPosts
   ] = await Promise.all([
     InjuryModel.find({}).sort({ lastUpdated: -1 }).lean(),
     fetchInjuriesFromApi("39"),
     fetchTeamOfTheWeek(),
     fetchNewsList(),
-    fetchTopLeagues()
+    fetchTopLeagues(),
+    getRelatedPosts()
   ]);
 
   const latestNewsForSidebar = allNews.slice(0, 5);
   const safeManualInjuries = manualInjuries || [];
   const safeApiInjuries = apiInjuriesResponse || [];
-  
+
   const manualInjuryPlayerIds = new Set(safeManualInjuries.map(inj => inj.playerId));
 
   const automatedInjuries = safeApiInjuries
@@ -75,7 +91,7 @@ export default async function InjuriesPage() {
     _id: injury._id.toString(),
     lastUpdated: injury.lastUpdated,
   }));
-  
+
   const combinedInjuries = [...serializedManualInjuries, ...automatedInjuries].sort(
     (a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
   );
@@ -84,18 +100,17 @@ export default async function InjuriesPage() {
     <div className="bg-[#1d222d] text-gray-200 min-h-screen">
       <Header />
       <SportsNav />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="lg:flex lg:gap-8">
-          
           <aside className="w-full lg:w-64 lg:order-1 flex-shrink-0 mb-8 lg:mb-0 lg:sticky lg:top-8 lg:self-start">
-            <LeftSidebar 
-              teamOfTheWeek={teamOfTheWeek} 
-              latestNews={latestNewsForSidebar} 
+            <LeftSidebar
+              teamOfTheWeek={teamOfTheWeek}
+              latestNews={latestNewsForSidebar}
             />
           </aside>
-          
-          <main className="w-full lg:flex-1 lg:order-2 lg:min-w-0">
+
+         <main className="w-full lg:flex-1 lg:order-2 lg:min-w-0">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-white mt-3">Football Scout - Player Availability and Chances of Playing</h1>
@@ -147,18 +162,22 @@ export default async function InjuriesPage() {
                 </div>
             </div>
           </main>
-          
+
           <aside className="hidden lg:block lg:w-72 lg:order-3 flex-shrink-0 lg:sticky lg:top-8 lg:self-start">
-            <RightSidebarNews 
-              initialTopLeagues={topLeagues} 
+            <RightSidebarNews
+              initialTopLeagues={topLeagues}
               initialFeaturedMatch={null}
             />
+            <div  className="mt-3">
+                 <RelatedPosts posts={relatedPosts} />
+            </div>
           </aside>
-
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
 }
+
+          

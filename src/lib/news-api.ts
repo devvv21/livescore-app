@@ -14,36 +14,55 @@ function generateSummaryFromHtml(html: string, length = 150): string {
 }
 
 /**
- * CORRECTED: This now maps correctly to `_id` and `imageUrl` from your internal types.
+ * CORRECTED: This now maps correctly to your internal NewsArticleSummary type.
  */
 function mapApiArticle(apiArticle: any): NewsArticleSummary {
-    return {
-        id: apiArticle.id.toString(), // Maps 'id' to '_id'
-        title: apiArticle.title,
-        slug: apiArticle.slug,
-        image_url: apiArticle.image_url, // Maps 'image_url' to 'imageUrl'
-        summary: apiArticle.description || generateSummaryFromHtml(apiArticle.full_article),
-        publishedAt: apiArticle.created_at,
-    };
+  return {
+    id: apiArticle.id.toString(),
+    title: apiArticle.title,
+    slug: apiArticle.slug,
+    image_url: apiArticle.image_url,
+    summary: apiArticle.description || generateSummaryFromHtml(apiArticle.full_article),
+    publishedAt: apiArticle.created_at,
+  };
 }
 
 /**
- * Fetches the list of news.
+ * ✅ NEW: Proper mapping for full article detail view
+ */
+function mapApiArticleDetail(apiArticle: any): NewsArticleDetail {
+  return {
+    id: apiArticle.id.toString(),
+    title: apiArticle.title,
+    slug: apiArticle.slug,
+    full_article: apiArticle.full_article,
+    summary: apiArticle.description || generateSummaryFromHtml(apiArticle.full_article),
+    image_url: apiArticle.image_url,
+    publishedAt: apiArticle.created_at, // ✅ Ensure date is properly mapped
+    category: apiArticle.category || [],
+    creator: apiArticle.creator || [],
+    keywords: apiArticle.keywords || [],
+  };
+}
+
+/**
+ * Fetches the list of news summaries.
  */
 export async function fetchNewsList(): Promise<NewsArticleSummary[]> {
   try {
-    // --- THE FIX: Caching is disabled for immediate updates ---
     const res = await fetch(`${NEWS_API_BASE_URL}/api/news`, { cache: 'no-store' });
-    
+
     if (!res.ok) {
       throw new Error('Failed to fetch news list');
     }
+
     const apiResponse = await res.json();
-    
+
     if (!apiResponse || !Array.isArray(apiResponse.data)) {
-        console.error("News API response is not in the expected format:", apiResponse);
-        return [];
+      console.error("News API response is not in the expected format:", apiResponse);
+      return [];
     }
+
     return apiResponse.data.map(mapApiArticle);
 
   } catch (error) {
@@ -53,11 +72,10 @@ export async function fetchNewsList(): Promise<NewsArticleSummary[]> {
 }
 
 /**
- * Fetches a single article by its slug.
+ * Fetches a single full article by slug.
  */
 export async function fetchNewsBySlug(slug: string): Promise<NewsArticleDetail | null> {
   try {
-    // --- THE FIX: Caching is disabled for immediate updates ---
     const res = await fetch(`${NEWS_API_BASE_URL}/api/news/slug/${slug}`, { cache: 'no-store' });
 
     if (!res.ok) {
@@ -69,9 +87,9 @@ export async function fetchNewsBySlug(slug: string): Promise<NewsArticleDetail |
     }
 
     const apiResponse = await res.json();
-    
+
     if (apiResponse && typeof apiResponse === 'object' && apiResponse.slug) {
-      return apiResponse;
+      return mapApiArticleDetail(apiResponse); // ✅ Mapped version
     } else {
       console.error(`API response for slug '${slug}' was not a valid article object.`);
       return null;

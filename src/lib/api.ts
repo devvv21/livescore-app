@@ -10,7 +10,6 @@ import { Highlight, Lineup, MatchLineupData } from './types';
 import { groupMatchesByLeague, mapApiFixtureToMatch } from './apiUtils';
 
 import LeagueListCacheModel from '@/models/LeagueListCache';
-import { Player } from '@/data/mockData';
 
 
 // ==================================================================

@@ -62,11 +62,18 @@ const Header = ({ onSearchToggle, children }: HeaderProps) => {
             <div className="hidden md:flex items-center space-x-4">
               {/* --- 2. ADD THE NOTIFICATION BELL FOR DESKTOP --- */}
               <NotificationBell />
-              <Star className="text-gray-300 w-6 h-6 hover:text-white cursor-pointer" />
+              {/* --- MODIFIED: Star icon wrapped in a Link --- */}
+              <Link href="https://todaylivescores.com/">
+                <Star className="text-gray-300 w-6 h-6 hover:text-white cursor-pointer" />
+              </Link>
             </div>
-            <button className="hidden md:block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full text-sm hover:bg-gray-200 transition-colors">
+            {/* --- MODIFIED: "SIGN IN" button changed to a Link --- */}
+            <Link 
+              href="https://todaylivescores.com/"
+              className="hidden md:block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full text-sm hover:bg-gray-200 transition-colors"
+            >
               SIGN IN
-            </button>
+            </Link>
             <div className="md:hidden flex items-center gap-2">
                 <button onClick={onSearchToggle} className="p-2 text-gray-300 hover:text-white">
                     <Search size={24} />
@@ -92,14 +99,22 @@ const Header = ({ onSearchToggle, children }: HeaderProps) => {
           >
             {/* You could add the dropdown items to the mobile menu here if you prefer */}
             <div className="flex flex-col p-4 space-y-4">
-              <button className="flex items-center gap-3 text-gray-200 hover:bg-gray-700 p-2 rounded-md">
+              {/* --- MODIFIED: Mobile "Favorites" button changed to a Link --- */}
+              <Link 
+                href="https://todaylivescores.com/"
+                className="flex items-center gap-3 text-gray-200 hover:bg-gray-700 p-2 rounded-md"
+              >
                   <Star className="w-5 h-5" />
                   <span>Favorites</span>
-              </button>
+              </Link>
               {/* Other mobile menu items */}
-              <button className="w-full bg-white text-gray-900 font-semibold py-2 rounded-full text-sm hover:bg-gray-200 transition-colors">
+              {/* --- MODIFIED: Mobile "SIGN IN" button changed to a Link --- */}
+              <Link 
+                href="https://todaylivescores.com/"
+                className="w-full block text-center bg-white text-gray-900 font-semibold py-2 rounded-full text-sm hover:bg-gray-200 transition-colors"
+              >
                 SIGN IN
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

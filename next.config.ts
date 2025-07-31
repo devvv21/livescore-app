@@ -1,9 +1,6 @@
-// ===== next.config.ts (Final Correct Version) =====
-
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // These flags can stay to prevent other potential build errors.
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -11,43 +8,37 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // This is the required configuration for your images from API-Football.
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'v3.football.api-sports.io',
       },
-      // === THIS IS THE NEW PART FOR NEWS IMAGES ===
-      // newsdata.io provides images from many different sources,
-      // so we need to allow them.
       {
         protocol: 'https',
-        hostname: 'cdn.sportmonks.com', // The correct domain for Sportmonks images
+        hostname: 'cdn.sportmonks.com',
         port: '',
-        pathname: '/**', // Allow all images from this domain
+        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'www.sportsmole.co.uk', // The one from the error
+        hostname: 'www.sportsmole.co.uk',
       },
       {
         protocol: 'https',
-        hostname: 'www.thesportstak.com', // A common one
+        hostname: 'www.thesportstak.com',
       },
       {
         protocol: 'https',
-        hostname: 'media.wired.com', // Another example
-      },
-      // You can add more as you see them in error messages, or use a wildcard.
-      // A wildcard is less secure but more convenient:
-      {
-        protocol: 'https',
-        hostname: '**.**.**', // Very broad, allows any domain
+        hostname: 'media.wired.com',
       },
       {
         protocol: 'https',
-        hostname: '**.**', // Also very broad
+        hostname: '**.**.**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.**',
       },
        {
         protocol: 'https',
@@ -59,12 +50,52 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'media.api-sports.io', // Main domain for API-Football
+        hostname: 'media.api-sports.io',
         port: '',
-        pathname: '/**', // Allow all paths from this domain
+        pathname: '/**',
       }
-      
     ],
+  },
+
+  async redirects() {
+    return [
+      // Rule 1: Redirects all old /team/... URLs to the new /teams-list/... structure.
+      {
+        source: '/team/:slug*',
+        destination: '/teams-list/:slug*',
+        permanent: true,
+      },
+      
+      // Rule 2: Redirects a specific broken link to the homepage.
+      {
+        source: '/llms.txt',
+        destination: '/',
+        permanent: true,
+      },
+
+      // --- NEWLY ADDED RULES FOR BROKEN NEWS LINKS ---
+      {
+        source: '/news/los-angeles-lakers-archive.html',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/news/nba-news-analysis.html',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/news/los-angeles-lakers-news-analysis.html',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/cdn-cgi/l/email-protection',
+        destination: '/',
+        permanent: true,
+      },
+      // --- END OF NEW RULES ---
+    ];
   },
 };
 

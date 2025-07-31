@@ -109,7 +109,7 @@ async function getCategoryData(categorySlug: string) {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const data = await getCategoryData(params.slug);
   const categoryName = data?.category.name ? `${data.category.name.charAt(0).toUpperCase()}${data.category.name.slice(1)}` : 'Category';
-  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/blog/category/${params.slug}`;
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL}blog/category/${params.slug}`;
 
   return {
     title: `Posts in: ${categoryName} | TLiveScores`,

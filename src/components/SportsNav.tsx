@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 // --- ADD THE NEW ICONS TO THE IMPORT ---
-import { Shield, Trophy, Newspaper, Users, TrendingUp, FileText } from 'lucide-react';
+import { Shield, Trophy, Newspaper, Users, TrendingUp, FileText, Binoculars, Radio } from 'lucide-react';
 
 interface SportsNavProps {
   liveMatchCount: number;
@@ -21,7 +21,8 @@ const SportsNav = ({ liveMatchCount }: SportsNavProps) => {
     { name: 'Sport Highlights', href: '/highlights', icon: <Trophy size={18} /> },
     // Changed icon from Trophy to TrendingUp for better representation
     { name: 'Predictions', href: '/predictions', icon: <TrendingUp size={18} /> },
-    { name: 'News', href: '/news', icon: <Newspaper size={18} /> },
+    { name: 'Football Scout', href: '/football-scout', icon: <Binoculars size={18} /> },
+    { name: 'News', href: '/news', icon: <Radio size={18} /> },
     // Changed icon from Newspaper to FileText to differentiate from News
     { name: 'Blogs', href: '/blog', icon: <FileText size={18} /> },
   ];

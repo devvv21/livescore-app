@@ -19,6 +19,7 @@
     "@editorjs/paragraph": "^2.11.7",
     "@editorjs/raw": "^2.5.1",
     "@editorjs/table": "^2.4.5",
+    "@headlessui/react": "^2.2.6",
     "@heroicons/react": "^2.2.0",
     "@tiptap/extension-image": "^3.0.6",
     "@tiptap/extension-link": "^3.0.6",
@@ -44,7 +45,8 @@
     "resend": "^4.6.0",
     "server-only": "^0.0.1",
     "swr": "^2.3.4",
-    "use-debounce": "^10.0.5"
+    "use-debounce": "^10.0.5",
+    "zod": "^4.0.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

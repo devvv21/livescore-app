@@ -48,6 +48,7 @@ export interface NewsArticleDetail {
   full_article: string;
   image_url: string;
   pubDate: string;
+  publishedAt: string;
   creator: string[];
   category: string[];
   country: string[];

@@ -35,7 +35,7 @@ const TableOfContents = ({ contentBlocks }: { contentBlocks?: IContentBlock[] | 
   };
 
   return (
-    <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+    <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
       <p className="text-lg font-bold text-white mb-3">Table of Contents</p>
       <ul className="space-y-2">
         {headings.map((heading, index) => (
@@ -59,7 +59,7 @@ const PostMeta = ({ categories, tags }: { categories?: ICategory[], tags?: ITag[
 
   if (!hasCategories && !hasTags) {
     return (
-      <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+      <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
         <p className="text-sm text-gray-400 text-center">No Categories or Tags</p>
       </div>
     );
@@ -68,7 +68,7 @@ const PostMeta = ({ categories, tags }: { categories?: ICategory[], tags?: ITag[
   return (
     <div className="space-y-6">
       {hasCategories && (
-        <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+        <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
           <p className="text-md font-semibold text-white mb-3 uppercase tracking-wider">Categories</p>
           <div className="flex flex-wrap gap-2">
             {categories.map(cat => (
@@ -80,7 +80,7 @@ const PostMeta = ({ categories, tags }: { categories?: ICategory[], tags?: ITag[
         </div>
       )}
       {hasTags && (
-        <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+        <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
           <p className="text-md font-semibold text-white mb-3 uppercase tracking-wider">Tags</p>
           <div className="flex flex-wrap gap-2">
             {tags.map(tag => (

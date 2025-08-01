@@ -9,7 +9,27 @@ import "../css/news.css";
 // Helper function to create clean IDs from heading text.
 const generateSlug = (text: string): string => {
   if (!text) return '';
-  return text.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+};
+
+// --- THE FIX for "Invalid Date" ---
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'Date not available';
+  const date = new Date(dateString);
+  return isNaN(date.getTime())
+    ? 'Invalid Date'
+    : date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
 };
 
 interface ArticleBodyProps {
@@ -24,17 +44,13 @@ export default function ArticleBody({ article }: ArticleBodyProps) {
     const contentElement = contentContainerRef.current;
     if (!contentElement) return;
 
-    // This observer will now be disconnected once its job is done.
     const observer = new MutationObserver((mutations, obs) => {
       const headingElements = contentElement.querySelectorAll('h1, h2, h3');
 
-      // If we found no headings, it might be an empty render, so we wait.
-      if (headingElements.length === 0) {
-        return;
-      }
+      if (headingElements.length === 0) return;
 
       const extracted: Heading[] = [];
-      const usedIds: { [key: string]: number } = {};
+      const usedIds: Record<string, number> = {};
 
       headingElements.forEach((h) => {
         const element = h as HTMLElement;
@@ -53,19 +69,12 @@ export default function ArticleBody({ article }: ArticleBodyProps) {
       });
 
       setHeadings(extracted);
-
-      // --- THE CRITICAL FIX ---
-      // We have successfully found and processed the headings.
-      // We MUST disconnect the observer now to prevent it from
-      // firing again and causing a render loop.
-      obs.disconnect();
+      obs.disconnect(); // 🔒 Critical fix to prevent infinite observation
     });
 
     observer.observe(contentElement, { childList: true, subtree: true });
 
-    // This return function is called when the component unmounts.
-    // It's good practice to ensure the observer is disconnected here too.
-    return () => observer.disconnect();
+    return () => observer.disconnect(); // Clean up on unmount
   }, [article.full_article]);
 
   const scrollToHeading = (id: string) => {
@@ -76,11 +85,6 @@ export default function ArticleBody({ article }: ArticleBodyProps) {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  // The completed JSX for the return statement.
   return (
     <div className="content-and-toc-wrapper">
       <main className="main-article-content">
@@ -91,15 +95,21 @@ export default function ArticleBody({ article }: ArticleBodyProps) {
           <p className="text-gray-400">
             Published on
             <ClientOnly>
-              <span> {formatDate(article.pubDate)}</span>
+              <span> {formatDate(article.publishedAt)}</span>
             </ClientOnly>
           </p>
         </header>
 
         <div className="relative w-full h-64 md:h-96 my-8 rounded-lg overflow-hidden">
-          <Image src={article.image_url} alt={article.title} fill className="object-cover" priority />
+          <Image
+            src={article.image_url}
+            alt={article.title}
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
-        
+
         <div
           ref={contentContainerRef}
           className="prose prose-invert prose-lg max-w-none text-gray-300"

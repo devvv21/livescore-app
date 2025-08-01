@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import SportsNav from "@/components/SportsNav";
 import Footer from "@/components/Footer";
 import RightSidebar from "@/components/RightSidebar";
+import "../news.css";
 
 type Props = { params: { slug: string } };
 

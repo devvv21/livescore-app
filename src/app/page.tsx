@@ -4,6 +4,9 @@ import Footer from "@/components/Footer";
 import { Metadata } from 'next';
 import DashboardWrapper from "@/components/DashboardWrapper";
 import { IPrediction } from "@/models/Prediction"; 
+import RelatedPosts from "@/components/RelatedPosts";
+import dbConnect from "@/lib/mongodb";
+import Post, { IPost } from "@/models/Post";
 
 import { 
   fetchDashboardData, 
@@ -13,9 +16,7 @@ import {
 import { fetchNewsList } from "@/lib/news-api";
 
 import { getMatchPrediction } from "@/lib/predictions";
-import { Odds } from "@/data/mockData";
 
-// --- METADATA (No Changes Needed) ---
 export const metadata: Metadata = {
   title: 'Live Sports Scores, Fixtures & Results',
   description: 'Get instant live scores, upcoming fixtures, and final results for football, basketball, tennis, and more. Your go-to source for the fastest sports updates.',
@@ -55,36 +56,41 @@ export const metadata: Metadata = {
   },
 };
 
+async function getRelatedPosts(): Promise<IPost[]> {
+  await dbConnect();
+  const posts = await Post.find({})
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .select("title slug featuredImageUrl createdAt")
+    .lean();
+  return posts as IPost[];
+}
 
 export default async function Home() {
   const [
     initialMatches, 
     topLeagues, 
     teamOfTheWeekPlayers, 
-    allNews 
+    allNews,
+    relatedPosts
   ] = await Promise.all([
     fetchDashboardData(),
     fetchTopLeagues(),
     fetchTeamOfTheWeek(),
-    fetchNewsList() 
+    fetchNewsList(),
+    getRelatedPosts()
   ]).catch(error => {
     console.error("Failed to fetch initial page data:", error);
-    return [[], [], [], []]; 
+    return [[], [], [], [], []]; 
   });
 
-  // This is the data enrichment step. It's critical that this is correct.
   const initialMatchesWithPredictions = Array.isArray(initialMatches) 
     ? await Promise.all(
         initialMatches.map(async (group) => {
           const matchesWithPredictions = await Promise.all(
             group.matches.map(async (match) => {
-              // Fetch the prediction for each match
               const predictionData = await getMatchPrediction(match);
-              
-              // Sanitize the Mongoose document into a plain object for the client
               const plainPrediction = predictionData ? JSON.parse(JSON.stringify(predictionData)) : null;
-
-              // Return the match object with the prediction attached
               return { ...match, prediction: plainPrediction };
             })
           );
@@ -101,13 +107,13 @@ export default async function Home() {
 
   return (
     <div className="bg-[#1d222d] text-gray-200 min-h-screen">
-      {/* This component receives the fully enriched data */}
       <DashboardWrapper
         initialMatches={initialMatchesWithPredictions}
         initialTopLeagues={topLeagues}
         initialTeamOfTheWeek={teamOfTheWeekPlayers}
         initialLatestNews={latestNewsForSidebar}
         initialFeaturedMatch={featuredMatch}
+        initialRelatedPosts={relatedPosts}
       />
       <Footer />
     </div>

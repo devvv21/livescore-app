@@ -133,7 +133,7 @@ export default async function CategoryArchivePage({ params }: { params: { slug: 
   const { category, posts, allCategories, allTags } = data;
 
   return (
-    <div className="bg-[#1d222d] text-white min-h-screen">
+    <div className="bg-[#2b3341] text-white min-h-screen">
       <Header />
       <SportsNav />
       <div className="container mx-auto px-4 py-8 md:py-12">

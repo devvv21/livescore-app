@@ -59,21 +59,17 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      // Rule 1: Redirects all old /team/... URLs to the new /teams-list/... structure.
+      // --- Existing Rules ---
       {
         source: '/team/:slug*',
         destination: '/teams-list/:slug*',
         permanent: true,
       },
-      
-      // Rule 2: Redirects a specific broken link to the homepage.
       {
         source: '/llms.txt',
         destination: '/',
         permanent: true,
       },
-
-      // --- NEWLY ADDED RULES FOR BROKEN NEWS LINKS ---
       {
         source: '/news/los-angeles-lakers-archive.html',
         destination: '/',
@@ -89,12 +85,37 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      
+      // --- Specific Rules for 404s ---
       {
+        // Covers:
+        // https://www.todaylivescores.com/cdn-cgi/l/email-protection
+        // https://todaylivescores.com/cdn-cgi/l/email-protection
         source: '/cdn-cgi/l/email-protection',
         destination: '/',
         permanent: true,
       },
-      // --- END OF NEW RULES ---
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/wbc%20welterweight%20champion%202025
+        source: '/blog/tag/wbc%20welterweight%20champion%202025',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        // Covers:
+        // https://www.todaylivescores.com/blog/tag/premier%20soccer%20league
+        source: '/blog/tag/premier%20soccer%20league',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/sports%202025
+        source: '/blog/tag/sports%202025',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };

@@ -11,7 +11,9 @@ import Footer from '@/components/Footer';
 import BackButton from '@/components/BackButton';
 import BlogPagination from '@/components/BlogPagination';
 import { IPost, ICategory, ITag } from '@/models/Post';
-import FormattedDate from '@/components/FormattedDate'; // The component that fixes the error
+import FormattedDate from '@/components/FormattedDate';
+import { fetchNewsList } from '@/lib/news-api';
+import { NewsArticleSummary } from '@/lib/types';
 
 export const revalidate = 3600;
 
@@ -21,16 +23,31 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://todaylivescores.com/blog' },
 };
 
+const formatDateForNews = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'Date unavailable';
+  try {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return 'Invalid Date';
+  }
+};
+
 async function getBlogPageData({ page = 1, limit = 6 }: { page: number; limit: number }) {
   await dbConnect();
   const skip = (page - 1) * limit;
 
-  const [posts, categories, tags, totalPosts] = await Promise.all([
+  const [posts, categories, tags, totalPosts, allNews] = await Promise.all([
     Post.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('categories', 'name').lean(),
     Category.find({}).sort({ name: 1 }).lean(),
     Tag.find({}).sort({ name: 1 }).lean(),
     Post.countDocuments(),
+    fetchNewsList(),
   ]);
+
+  const latestNews = allNews.slice(0, 3);
 
   return {
     posts: JSON.parse(JSON.stringify(posts)),
@@ -38,6 +55,7 @@ async function getBlogPageData({ page = 1, limit = 6 }: { page: number; limit: n
     tags: JSON.parse(JSON.stringify(tags)),
     totalPages: Math.ceil(totalPosts / limit),
     currentPage: page,
+    latestNews: JSON.parse(JSON.stringify(latestNews)),
   };
 }
 
@@ -74,7 +92,6 @@ const PostCard = ({ post }: { post: IPost }) => {
         <div className="text-xs text-gray-500 border-t border-gray-700 pt-3 mt-auto">
           <span>By {post.author || 'Staff'}</span>
           <span className="mx-2">•</span>
-          {/* FIX: Using the safe component to render the date */}
           <FormattedDate dateString={post.createdAt} />
         </div>
       </div>
@@ -82,7 +99,7 @@ const PostCard = ({ post }: { post: IPost }) => {
   );
 };
 
-const Sidebar = ({ categories, tags }: { categories: ICategory[]; tags: ITag[] }) => (
+const Sidebar = ({ categories, tags, latestNews }: { categories: ICategory[]; tags: ITag[]; latestNews: NewsArticleSummary[] }) => (
   <aside className="lg:col-span-3 space-y-8 sticky top-24">
     <div className="p-4 bg-[#283040] rounded-lg border border-gray-700">
       <h3 className="text-lg font-bold text-white mb-4">Categories</h3>
@@ -106,6 +123,31 @@ const Sidebar = ({ categories, tags }: { categories: ICategory[]; tags: ITag[] }
         ))}
       </div>
     </div>
+    <div className="p-4 bg-[#283040] rounded-lg border border-gray-700">
+        <h3 className="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">
+          Latest News
+        </h3>
+        {latestNews.length > 0 ? (
+            <ul className="space-y-4">
+              {latestNews.map((article) => (
+                <li key={article.id || article.slug}>
+                  <Link href={`/news/${article.slug}`} className="flex items-start gap-3 group">
+                    <div className="relative w-24 h-16 flex-shrink-0">
+                      <Image src={article.image_url || '/placeholder-image.jpg'} alt={article.title} fill sizes="100px" className="rounded-md object-cover"/>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-teal-400 text-xs font-semibold mb-1 uppercase">{article.keywords?.split(',')[0] || 'News'}</p>
+                      <p className="font-semibold text-sm text-white group-hover:text-blue-400 transition-colors leading-tight">{article.title}</p>
+                      <p className="text-gray-400 text-xs mt-1">{formatDateForNews(article.publishedAt)}</p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+        ) : (
+          <p className="text-center text-gray-400 py-8 text-sm">No recent news available.</p>
+        )}
+      </div>
   </aside>
 );
 
@@ -113,7 +155,7 @@ export default async function BlogListPage({ searchParams }: { searchParams?: { 
   const currentPage = Number(searchParams?.page) || 1;
   const postsPerPage = 6;
 
-  const { posts, categories, tags, totalPages } = await getBlogPageData({
+  const { posts, categories, tags, totalPages, latestNews } = await getBlogPageData({
     page: currentPage,
     limit: postsPerPage,
   });
@@ -138,7 +180,7 @@ export default async function BlogListPage({ searchParams }: { searchParams?: { 
                     <PostCard key={post._id.toString()} post={post} />
                   ))}
                 </div>
-                <BlogPagination currentPage={currentPage} totalPages={totalPages} />
+                <BlogPagination currentPage={currentPage} totalPages={totalPages} basePath="/blog" />
               </>
             ) : (
               <div className="text-center py-20 bg-[#283040] rounded-lg">
@@ -147,7 +189,7 @@ export default async function BlogListPage({ searchParams }: { searchParams?: { 
               </div>
             )}
           </main>
-          <Sidebar categories={categories} tags={tags} />
+          <Sidebar categories={categories} tags={tags} latestNews={latestNews} />
         </div>
       </div>
       <Footer />

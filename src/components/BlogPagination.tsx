@@ -5,19 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 interface BlogPaginationProps {
   currentPage: number;
   totalPages: number;
+  basePath: string;
 }
 
-const BlogPagination = ({ currentPage, totalPages }: BlogPaginationProps) => {
+const BlogPagination = ({ currentPage, totalPages, basePath }: BlogPaginationProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Do not render the component if there's only one page or less
   if (totalPages <= 1) {
     return null;
   }
 
   const handlePageChange = (page: number) => {
-    // Ensure the page number is within valid bounds before navigating
     if (page < 1 || page > totalPages) {
       return;
     }
@@ -26,7 +25,8 @@ const BlogPagination = ({ currentPage, totalPages }: BlogPaginationProps) => {
     current.set('page', page.toString());
     const search = current.toString();
     const query = search ? `?${search}` : '';
-    router.push(`/blog${query}`);
+
+    router.push(`${basePath}${query}`);
   };
 
   const isFirstPage = currentPage <= 1;
@@ -34,7 +34,6 @@ const BlogPagination = ({ currentPage, totalPages }: BlogPaginationProps) => {
 
   return (
     <nav aria-label="Blog post navigation" className="flex justify-center items-center gap-6 my-12">
-      {/* Previous Button */}
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={isFirstPage}
@@ -44,12 +43,10 @@ const BlogPagination = ({ currentPage, totalPages }: BlogPaginationProps) => {
         <span>Previous</span>
       </button>
 
-      {/* Page Indicator */}
       <div className="text-lg font-semibold text-gray-200">
         Page {currentPage} of {totalPages}
       </div>
 
-      {/* Next Button */}
       <button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={isLastPage}

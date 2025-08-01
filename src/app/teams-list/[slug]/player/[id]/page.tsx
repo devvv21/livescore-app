@@ -6,18 +6,31 @@ import SportsNav from '@/components/SportsNav';
 import Footer from '@/components/Footer';
 import { ShieldCheck, Target, Footprints, Clock, Star, Globe } from 'lucide-react';
 import { Metadata } from 'next';
-import { PlayerDetails } from '@/lib/api'; // Import the type
+import { PlayerDetails } from '@/lib/api';
 
 // Define a type for the page props
 interface PlayerProfilePageProps {
   params: {
+    // Add slug here to match the folder structure
+    slug: string; 
     id: string;
   };
 }
 
+// Helper function to create URL-friendly slugs from strings
+const slugify = (text: string | undefined | null): string => {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')       // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')    // Remove all non-word characters except hyphens
+    .replace(/\-\-+/g, '-');      // Replace multiple hyphens with a single one
+};
+
 // --- DYNAMIC METADATA FUNCTION ---
 export async function generateMetadata({ params }: PlayerProfilePageProps): Promise<Metadata> {
-  // We fetch the player data once here for the metadata
   const player = await fetchPlayerDetails(params.id);
 
   if (!player) {
@@ -31,8 +44,17 @@ export async function generateMetadata({ params }: PlayerProfilePageProps): Prom
     player.team.name, player.league.name, player.nationality,
     'football player stats', 'live scores',
   ];
+  
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://todaylivescores.com';
-  const canonicalUrl = `${baseUrl}/player/${player.id}`;
+  
+  // Get the slug from the params for the URL.
+  // We use the page's actual slug parameter instead of re-generating it.
+  const teamSlug = params.slug; 
+
+  // --- FIX APPLIED HERE ---
+  // The "/player/" segment is now correctly included in the path.
+  const path = `teams-list/${teamSlug}/player/${player.id}`;
+  const canonicalUrl = `${baseUrl}${path.replace(/\/\//g, '/')}`;
 
   return {
     title,
@@ -41,7 +63,7 @@ export async function generateMetadata({ params }: PlayerProfilePageProps): Prom
     authors: [{ name: 'TodayLiveScores' }],
     publisher: 'TodayLiveScores',
     alternates: {
-      canonical: canonicalUrl,
+      canonical: canonicalUrl, // Use the corrected URL
     },
     robots: {
       index: true,
@@ -50,7 +72,7 @@ export async function generateMetadata({ params }: PlayerProfilePageProps): Prom
     openGraph: {
       title,
       description,
-      url: canonicalUrl,
+      url: canonicalUrl, // Use the corrected URL
       siteName: 'TodayLiveScores',
       images: [{ url: player.photo, width: 256, height: 256, alt: `Photo of ${player.name}` }],
       locale: 'en_US',
@@ -76,8 +98,6 @@ const StatItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label
 
 export default async function PlayerProfilePage({ params }: PlayerProfilePageProps) {
   const { id } = params;
-
-  // Data is fetched once and reused from the cache by Next.js
   const player = await fetchPlayerDetails(id);
 
   if (!player) {
@@ -90,10 +110,8 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
       <SportsNav />
       <div className="container mx-auto px-4 py-6">
         <div className="lg:flex lg:gap-6">
-          {/* Main Content - Takes up the full width now */}
           <main className="w-full lg:flex-1 lg:order-2 lg:min-w-0">
             <div className="bg-[#1f2632] rounded-lg shadow-lg overflow-hidden">
-              {/* Player Header */}
               <div className="bg-[#2b3341] p-6 md:flex md:items-center md:gap-6">
                 <div className="relative w-32 h-32 mx-auto md:mx-0 mb-4 md:mb-0 flex-shrink-0">
                   <Image
@@ -120,7 +138,6 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
                 </div>
               </div>
 
-              {/* Player Stats Grid */}
               <div className="p-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <StatItem icon={Footprints} label="Appearances" value={player.games.appearences} />
                 <StatItem icon={Target} label="Goals" value={player.statistics.goals} />
@@ -141,7 +158,6 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
             </div>
           </main>
 
-          {/* Right Sidebar */}
           <aside className="hidden lg:block lg:w-72 lg:order-3 flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
             <div className="bg-[#2b3341] rounded-lg p-4 shadow-lg">
               <h3 className="text-lg font-bold text-white mb-4">League Info</h3>

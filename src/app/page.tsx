@@ -72,7 +72,7 @@ export default async function Home() {
     topLeagues, 
     teamOfTheWeekPlayers, 
     allNews,
-    relatedPosts
+    rawRelatedPosts
   ] = await Promise.all([
     fetchDashboardData(),
     fetchTopLeagues(),
@@ -98,6 +98,12 @@ export default async function Home() {
         })
       )
     : [];
+    
+  const relatedPosts = rawRelatedPosts.map(post => ({
+    ...post,
+    _id: post._id.toString(),
+    createdAt: post.createdAt.toString(),
+  }));
 
   const featuredMatch = Array.isArray(initialMatchesWithPredictions) 
       ? initialMatchesWithPredictions.flatMap(g => g.matches).find(m => m.status === 'LIVE' || m.status === 'HT') || null

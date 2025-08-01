@@ -1,5 +1,5 @@
 
-          import { fetchInjuriesFromApi, fetchTeamOfTheWeek, fetchTopLeagues } from "@/lib/api";
+import { fetchInjuriesFromApi, fetchTeamOfTheWeek, fetchTopLeagues } from "@/lib/api";
 import { fetchNewsList } from "@/lib/news-api";
 import InjuryModel from "@/models/Injury";
 import dbConnect from "@/lib/mongodb";
@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SportsNav from "@/components/SportsNav";
 import LeftSidebar from "@/components/LeftSidebar";
-import RightSidebarNews from "@/components/RightSideBarNews";
+import RightSidebarScout from "@/components/RightSideBarScout";
 import PublicInjuriesTable from "@/components/PublicInjuriesTable";
 import RelatedPosts from "@/components/RelatedPosts";
 import Post from "@/models/Post";
@@ -164,7 +164,7 @@ export default async function InjuriesPage() {
           </main>
 
           <aside className="hidden lg:block lg:w-72 lg:order-3 flex-shrink-0 lg:sticky lg:top-8 lg:self-start">
-            <RightSidebarNews
+            <RightSidebarScout
               initialTopLeagues={topLeagues}
               initialFeaturedMatch={null}
             />

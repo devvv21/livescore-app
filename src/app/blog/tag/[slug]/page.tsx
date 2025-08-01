@@ -18,7 +18,7 @@ const PostCard = ({ post }: { post: IPost }) => {
   const imageUrl = `https://todaylivescores.com${post.featuredImageUrl || '/placeholder-image.jpg'}`;
 
   return (
-    <div className="bg-[#283040] rounded-lg overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+    <div className="bg-[#2b3341] rounded-lg overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
       <Link href={`/blog/${post.slug}`} className="block group">
         <div className="relative w-full h-48">
           <Image

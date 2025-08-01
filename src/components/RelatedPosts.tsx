@@ -25,7 +25,7 @@ const RelatedPostCard = ({ post }: { post: IPost }) => {
         />
       </div>
       <div className="flex-grow">
-        <h4 className="text-sm font-semibold text-white leading-tight group-hover:text-red-400 transition-colors">
+        <h4 className="text-sm font-semibold text-white leading-tight group-hover:text-blue-400 transition-colors">
           {post.title}
         </h4>
         <p className="text-xs text-gray-500 mt-1">
@@ -44,7 +44,7 @@ const RelatedPosts = ({ posts }: { posts: IPost[] }) => {
   }
 
   return (
-    <div className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+    <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
       <h3 className="text-md font-semibold text-white mb-4 uppercase tracking-wider">
         You Might Also Like
       </h3>

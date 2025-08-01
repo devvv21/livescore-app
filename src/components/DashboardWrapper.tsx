@@ -10,9 +10,11 @@ import MatchListContainer from '@/components/MatchListContainer';
 import SportsNav from '@/components/SportsNav';
 import SearchResults from '@/components/SearchResults';
 import SearchModal from '@/components/SearchModal';
+import RelatedPosts from "@/components/RelatedPosts";
 import { getMatchesByDate, searchEverything } from '@/app/actions';
-import { LeagueGroup, Match, Team, Player } from '@/data/mockData';
+import { LeagueGroup, Match, Player } from '@/data/mockData';
 import { NewsArticleSummary } from '@/lib/types';
+import { IPost } from "@/models/Post";
 import { XCircle, Search } from 'lucide-react';
 import BannerSlider from '@/components/BannerSlider';
 import '@/css/banner-slider.css';
@@ -20,13 +22,6 @@ import { IPrediction } from '@/models/Prediction';
 
 type EnrichedMatch = Match & { prediction: IPrediction | null };
 type EnrichedLeagueGroup = Omit<LeagueGroup, 'matches'> & { matches: EnrichedMatch[] };
-
-const isToday = (someDate: Date) => {
-  const today = new Date();
-  return someDate.getDate() === today.getDate() &&
-    someDate.getMonth() === today.getMonth() &&
-    someDate.getFullYear() === today.getFullYear();
-};
 
 const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
@@ -42,6 +37,7 @@ interface DashboardWrapperProps {
   initialTeamOfTheWeek: Player[];
   initialLatestNews: NewsArticleSummary[];
   initialFeaturedMatch: EnrichedMatch | null;
+  initialRelatedPosts: IPost[];
 }
 
 export default function DashboardWrapper({
@@ -50,6 +46,7 @@ export default function DashboardWrapper({
   initialTeamOfTheWeek,
   initialLatestNews,
   initialFeaturedMatch,
+  initialRelatedPosts,
 }: DashboardWrapperProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
@@ -63,16 +60,9 @@ export default function DashboardWrapper({
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   
   const [activeTab, setActiveTab] = useState<'all' | 'live' | 'finished' | 'upcoming'>('all');
-  const [isPageVisible, setIsPageVisible] = useState(true);
   
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => setIsPageVisible(!document.hidden);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -223,6 +213,9 @@ export default function DashboardWrapper({
           </main>
           <aside className="hidden lg:block lg:w-72 lg:order-3 flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
             <RightSidebar initialTopLeagues={initialTopLeagues} initialFeaturedMatch={featuredMatch} />
+            <div className="mt-3">
+                 <RelatedPosts posts={initialRelatedPosts} />
+            </div>
           </aside>
         </div>
       </div>

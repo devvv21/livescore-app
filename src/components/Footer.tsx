@@ -1,6 +1,6 @@
 // src/components/Footer.tsx
 
-import {  FaRegCopyright, FaFacebook, FaMedium, FaPinterest } from 'react-icons/fa';
+import {  FaRegCopyright, FaFacebook, FaMedium, FaPinterest, FaQuora, FaReddit, FaBlogger } from 'react-icons/fa';
 import XLogoIcon from '@/components/icons/XLogoIcon';
 
 const Footer = () => {
@@ -56,14 +56,35 @@ const Footer = () => {
           </div>
           
           <div>
-            <h2 className="text-lg font-bold text-white mb-4">Follow Us</h2>
-            <div className="flex space-x-4">
-              <a href="https://web.facebook.com/todaylivescoresofficial?_rdc=1&_rdr#" aria-label="Facebook" className="text-gray-400 hover:text-white transition-colors"><FaFacebook size={24} /></a>
-              <a href="https://x.com/todaylivescores" aria-label="Follow us on X" className="text-gray-400 hover:text-white transition-colors"> <XLogoIcon className="h-5 w-5 text-gray-400 hover:text-white" /></a>
-            <a href="https://medium.com/@todaylivescoressa" aria-label="Follow us on X" className="text-gray-400 hover:text-white transition-colors"> <FaMedium className="h-5 w-5 text-gray-400 hover:text-white" /></a>
-            <a href="https://za.pinterest.com/todaylivescores" aria-label="Follow us on X" className="text-gray-400 hover:text-white transition-colors"> <FaPinterest className="h-5 w-5 text-gray-400 hover:text-white" /></a>
-            </div>
-          </div>
+    <h2 class="text-lg font-bold text-white mb-4">Follow Us</h2>
+    <div class="flex flex-col space-y-4">
+        <div class="flex space-x-4">
+            <a href="https://web.facebook.com/todaylivescoresofficial?_rdc=1&_rdr#" aria-label="Follow us on Facebook" class="text-gray-400 hover:text-white transition-colors">
+                <FaFacebook size={24} />
+            </a>
+            <a href="https://x.com/todaylivescores" aria-label="Follow us on X" class="text-gray-400 hover:text-white transition-colors">
+                <XLogoIcon class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+            <a href="https://medium.com/@todaylivescoressa" aria-label="Follow us on medium" class="text-gray-400 hover:text-white transition-colors">
+                <FaMedium class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+            <a href="https://za.pinterest.com/todaylivescores" aria-label="Follow us on pinterest" class="text-gray-400 hover:text-white transition-colors">
+                <FaPinterest class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+        </div>
+        <div class="flex space-x-4">
+            <a href="https://www.quora.com/profile/Vasco-Shoot" aria-label="Follow us on quora" class="text-gray-400 hover:text-white transition-colors">
+                <FaQuora class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+            <a href="https://www.reddit.com/user/Unlucky-Corner-8445/" aria-label="Follow us on reddit" class="text-gray-400 hover:text-white transition-colors">
+                <FaReddit class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+            <a href="https://todayslivescore.blogspot.com/" aria-label="Follow us on blogger" class="text-gray-400 hover:text-white transition-colors">
+                <FaBlogger class="h-5 w-5 text-gray-400 hover:text-white" />
+            </a>
+        </div>
+    </div>
+</div>
         </div>
         
         <div className="mt-12 pt-8 border-t border-gray-700 text-center text-gray-500 text-sm flex items-center justify-center">

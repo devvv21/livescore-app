@@ -3,17 +3,18 @@
 import { notFound } from "next/navigation";
 import { Metadata } from 'next';
 
-// Data fetching functions
-import { fetchNewsBySlug, fetchNewsList } from "@/lib/news-api";
-import { fetchTeamOfTheWeek, fetchTopLeagues } from "@/lib/api";
+import { fetchNewsBySlug } from "@/lib/news-api";
+import { fetchTopLeagues } from "@/lib/api";
+import dbConnect from "@/lib/mongodb";
+import Post, { IPost } from "@/models/Post";
 
-// Component Imports
 import ArticleBody from "@/components/ArticleBody";
 import BackToNewsButton from "@/components/BackToNewsButton";
 import Header from "@/components/Header";
 import SportsNav from "@/components/SportsNav";
 import Footer from "@/components/Footer";
-import RightSidebar from "@/components/RightSidebar";
+import RightSidebarNews from "@/components/RightSideBarNews";
+import RelatedPosts from "@/components/RelatedPosts";
 import "../news.css";
 
 type Props = { params: { slug: string } };
@@ -29,23 +30,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = article.title || "News Article";
-  
-  // A robust description generator
   let finalDescription = '';
-  const minDescriptionLength = 70; // Set a minimum acceptable length
+  const minDescriptionLength = 70;
 
-  // First, check if the API summary is good enough
   if (article.summary && article.summary.length > minDescriptionLength) {
-    // If it's good, use it, but make sure it's not too long
     finalDescription = article.summary.slice(0, 155) + (article.summary.length > 155 ? '...' : '');
   } else {
-    // If the summary is too short or missing, generate a better one from the title.
     const fallback = `Read the full story on "${title}". Get in-depth analysis and the latest updates on TLiveScores, your definitive source for breaking sports news.`;
-    // Ensure the generated fallback also respects the length limit.
     finalDescription = fallback.slice(0, 155) + (fallback.length > 155 ? '...' : '');
   }
 
-  // Handle keywords
   let keywords: string[] = [];
   if (article.keywords) {
     if (Array.isArray(article.keywords)) {
@@ -58,7 +52,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords = title.split(' ').slice(0, 10);
   }
 
-  // --- FIX: Prepare author data for consistency ---
   const authorNames = (article.creator && article.creator.length > 0) 
     ? article.creator 
     : ['TLiveScores Staff'];
@@ -71,11 +64,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: finalDescription,
     keywords: keywords.slice(0, 7),
-    
-    // --- FIX: Add top-level publisher and author metadata ---
     publisher: 'TLiveScores',
     authors: authorNames.map(name => ({ name: name })),
-
     alternates: {
       canonical: canonicalUrl,
     },
@@ -95,7 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: 'en_US',
       type: 'article',
       publishedTime: article.publishedAt,
-      authors: authorNames, // Use consistent author data here
+      authors: authorNames,
     },
     twitter: {
       card: 'summary_large_image',
@@ -114,24 +104,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+async function getRelatedPosts(): Promise<IPost[]> {
+  await dbConnect();
+  const posts = await Post.find({})
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .select("title slug featuredImageUrl createdAt")
+    .lean();
+  return posts as IPost[];
+}
 
-// The page component
 export default async function NewsArticlePage({ params }: Props) {
   const [
     article,
-    allNews,
-    teamOfTheWeek,
     topLeagues,
+    rawRelatedPosts
   ] = await Promise.all([
     fetchNewsBySlug(params.slug),
-    fetchNewsList(),
-    fetchTeamOfTheWeek(),
     fetchTopLeagues(),
+    getRelatedPosts(),
   ]);
 
   if (!article) {
     notFound();
   }
+
+  const relatedPosts = rawRelatedPosts.map(post => ({
+    ...post,
+    _id: post._id.toString(),
+    createdAt: post.createdAt.toString(),
+  }));
 
   return (
     <div className="bg-[#1d222d] text-gray-200 min-h-screen">
@@ -148,10 +150,13 @@ export default async function NewsArticlePage({ params }: Props) {
           </main>
           
           <aside className="hidden lg:block lg:w-72 lg:order-3 flex-shrink-0 lg:sticky lg:top-8 lg:self-start">
-            <RightSidebar 
+            <RightSidebarNews 
               initialTopLeagues={topLeagues} 
               initialFeaturedMatch={null}
             />
+            <div className="mt-8">
+              <RelatedPosts posts={relatedPosts} />
+            </div>
           </aside>
         </div>
       </div>

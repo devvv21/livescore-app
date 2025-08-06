@@ -116,6 +116,27 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+       {
+        // Covers:
+        // https://www.todaylivescores.com/blog/tag/rugby%20union
+        source: '/blog/tag/rugby%20union',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/rugby%20union
+        source: '/blog/tag/rugby%20union',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/premier%20league%20summer%20series
+        source: '/blog/tag/premier%20league%20summer%20series',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };

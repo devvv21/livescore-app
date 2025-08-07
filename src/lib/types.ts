@@ -21,7 +21,7 @@ export interface IInjuryData {
   teamId: number;
   teamName: string;
   teamLogo: string;
-  status: string;
+  status: typeof injuryStatuses[number];
   details: string;
   returnDate: string;
   lastUpdated: Date | string;

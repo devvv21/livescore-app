@@ -137,6 +137,52 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        // Covers:
+        // https://www.todaylivescores.com/blog/tag/psl-2024/25
+        source: '/blog/tag/psl-2024/25',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/psl-2024/25
+        source: '/blog/tag/psl-2024/25',
+        destination: '/',
+        permanent: true,
+      },
+
+      {
+        // Covers:
+        // https://www.todaylivescores.com/blog/tag/african%20football
+        source: '/blog/tag/african%20football',
+        destination: '/',
+        permanent: true,
+      },
+
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/african%20football
+        source: '/blog/tag/african%20football',
+        destination: '/',
+        permanent: true,
+      },
+
+      {
+        // Covers:
+        // https://todaylivescores.com/blog/tag/psl%202024%2F25
+        source: '/blog/tag/psl%202024%2F25',
+        destination: '/',
+        permanent: true,
+      },
+
+      {
+        // Covers:
+        // https://www.todaylivescores.com/blog/tag/psl%202024%2F25
+        source: '/blog/tag/psl%202024%2F25',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };

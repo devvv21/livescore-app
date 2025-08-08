@@ -1,6 +1,5 @@
 // src/lib/utils.ts
 
-// --- 1. THE "MASTER" SLUG FUNCTION (Unchanged) ---
 export const createSlug = (name: string): string => {
   if (!name) return '';
   const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'
@@ -16,30 +15,28 @@ export const createSlug = (name: string): string => {
     .replace(/-+$/, '');       
 };
 
-// --- 2. YOUR SLUG CREATION FUNCTIONS (Unchanged) ---
 export const createTeamSlug = (name: string, id: number): string => {
   if (!name || !id) return '';
   const baseSlug = createSlug(name);
   return `${baseSlug}-${id}`;
 };
+
 export const createLeagueSlug = (name: string, id: number): string => {
     if (!name || !id) return '';
     const baseSlug = createSlug(name);
     return `${baseSlug}-${id}`;
 };
 
-
-
 export function generateSlug(homeTeam: string, awayTeam: string, id: number): string {
     const cleanedHome = createSlug(homeTeam);
     const cleanedAway = createSlug(awayTeam);
     return `${cleanedHome}-vs-${cleanedAway}-${id}`;
 }
+
 export function generateNewsSlug(title: string): string {
   return createSlug(title);
 }
 
-// --- 3. THE GENERIC ID EXTRACTION FUNCTION (Unchanged) ---
 export const getIdFromSlug = (slug: string): string | null => {
     if (!slug) return null;
     const parts = slug.split('-');
@@ -47,9 +44,26 @@ export const getIdFromSlug = (slug: string): string | null => {
     return /^\d+$/.test(potentialId) ? potentialId : null;
 };
 
-// --- 4. NEW HELPER FUNCTION (Optional) ---
-// Since your API provides the country code directly, you may not need this.
-// But it's good practice to have it in case you work with other data sources.
+export const createTagSlug = (tagName: string): string => {
+  const withHyphens = tagName.replace(/ /g, '-'); // Replace space with hyphen
+  const safeName = withHyphens.replace(/\//g, '\/'); // Handle slashes separately
+  return encodeURIComponent(safeName);
+};
+
+export const getTagNameFromSlug = (slug: string): string => {
+  const decodedSlug = decodeURIComponent(slug);
+  const withSlashes = decodedSlug.replace(/--/g, '/'); // Restore slashes first
+  return withSlashes.replace(/-/g, ' '); // Restore hyphens to spaces
+};
+
+export const createCategorySlug = (categoryName: string): string => {
+  return encodeURIComponent(categoryName.replace(/ /g, '-'));
+};
+
+export const getCategoryNameFromSlug = (slug: string): string => {
+  return decodeURIComponent(slug).replace(/-/g, ' ');
+};
+
 const countryNameToCodeMap: { [key: string]: string } = {
   'England': 'GB', 'Spain': 'ES', 'Germany': 'DE', 'Italy': 'IT', 'France': 'FR',
   'Portugal': 'PT', 'Netherlands': 'NL', 'Brazil': 'BR', 'Argentina': 'AR',
@@ -57,5 +71,5 @@ const countryNameToCodeMap: { [key: string]: string } = {
 };
 
 export function convertCountryNameToCode(countryName: string): string {
-  return countryNameToCodeMap[countryName] || 'XX'; // Return a default/unknown code
+  return countryNameToCodeMap[countryName] || 'XX';
 }

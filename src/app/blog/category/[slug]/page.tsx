@@ -1,3 +1,5 @@
+// src/app/blog/category/[slug]/page.tsx
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -15,7 +17,7 @@ import BlogPagination from '@/components/BlogPagination';
 import FormattedDate from '@/components/FormattedDate';
 import { fetchNewsList } from '@/lib/news-api';
 import { NewsArticleSummary } from '@/lib/types';
-
+import { createTagSlug, createCategorySlug, getCategoryNameFromSlug } from '@/lib/utils';
 
 const formatDateForNews = (dateString: string | null | undefined): string => {
   if (!dateString) return 'Date unavailable';
@@ -71,7 +73,7 @@ const Sidebar = ({ categories, tags, latestNews }: { categories: ICategory[], ta
         <ul className="space-y-2">
           {categories.map(cat => (
             <li key={cat._id.toString()}>
-              <Link href={`/blog/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`} className="text-gray-300 hover:text-blue-400 transition-colors block capitalize">
+              <Link href={`/blog/category/${createCategorySlug(cat.name)}`} className="text-gray-300 hover:text-blue-400 transition-colors block capitalize">
                 {cat.name}
               </Link>
             </li>
@@ -82,7 +84,7 @@ const Sidebar = ({ categories, tags, latestNews }: { categories: ICategory[], ta
         <h3 className="text-lg font-bold text-white mb-3">Tags</h3>
         <div className="flex flex-wrap gap-2">
           {tags.map(tag => (
-            <Link key={tag._id.toString()} href={`/blog/tag/${tag.name.toLowerCase().replace(/\s+/g, '-')}`} className="bg-gray-700 text-gray-300 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-gray-600 transition-colors">
+            <Link key={tag._id.toString()} href={`/blog/tag/${createTagSlug(tag.name)}`} className="bg-gray-700 text-gray-300 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-gray-600 transition-colors">
               #{tag.name}
             </Link>
           ))}
@@ -118,7 +120,7 @@ const Sidebar = ({ categories, tags, latestNews }: { categories: ICategory[], ta
 );
 
 async function getCategoryData(categorySlug: string, { page = 1, limit = 6 }: { page: number; limit: number }) {
-  const categoryName = categorySlug.replace(/-/g, ' ');
+  const categoryName = getCategoryNameFromSlug(categorySlug);
   const skip = (page - 1) * limit;
 
   await dbConnect();

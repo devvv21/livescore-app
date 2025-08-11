@@ -1,6 +1,5 @@
 // src/app/admin/injuries/create/page.tsx
-
-import { fetchAllPlayersInLeague, fetchInjuriesFromApi, fetchTransfersFromApi, fetchAllTeamsInLeague } from "@/lib/api";
+import { fetchAllPlayersInLeagues, fetchAllTeamsInLeagues, fetchInjuriesFromApi, fetchTransfersFromApi } from "@/lib/api";
 import InjuryModel, { IInjury } from "@/models/Injury";
 import TransferModel, { ITransfer } from "@/models/Transfer";
 import InjuriesTable from "@/components/InjuriesTable";
@@ -10,19 +9,19 @@ import CreateInjuryForm from "@/components/CreateInjuryForm";
 import CreateTransferForm from "@/components/CreateTransferForm";
 import TabbedView from "@/components/TabbedView";
 
+const leagueIds = ["39", "78"];
+
 export default async function ManagementPage() {
-  // --- Data Fetching (No Changes) ---
   await dbConnect();
   const [players, teams, manualInjuries, apiInjuriesResponse, manualTransfers, apiTransfersResponse] = await Promise.all([
-    fetchAllPlayersInLeague("39"),
-    fetchAllTeamsInLeague("39"),
+    fetchAllPlayersInLeagues(leagueIds, "2024"),
+    fetchAllTeamsInLeagues(leagueIds, "2024"),
     InjuryModel.find({}).sort({ lastUpdated: -1 }).lean(),
     fetchInjuriesFromApi("39"),
     TransferModel.find({}).sort({ date: -1 }).lean(),
     fetchTransfersFromApi("39")
   ]);
 
-  // --- CORRECTED Data Processing ---
   const safePlayers = players || [];
   const safeTeams = teams || [];
   const safeManualInjuries = manualInjuries || [];
@@ -57,7 +56,7 @@ export default async function ManagementPage() {
     _id: injury._id.toString(),
     lastUpdated: injury.lastUpdated.toISOString(),
   }));
-  
+
   const combinedInjuries = [...serializedManualInjuries, ...automatedInjuries].sort(
     (a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
   );
@@ -96,8 +95,6 @@ export default async function ManagementPage() {
     (a, b) => new Date(b.transferDate).getTime() - new Date(a.transferDate).getTime()
   );
 
-
-  // --- Define Tab Content (No Changes) ---
   const tabs = [
     {
       id: 'injuries',
@@ -133,7 +130,6 @@ export default async function ManagementPage() {
     }
   ];
 
-  // --- Render Page with Tabs (No Changes) ---
   return (
     <div className="min-h-screen p-4 sm:p-8">
       <div className="max-w-screen-2xl mx-auto">

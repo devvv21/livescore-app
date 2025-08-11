@@ -16,54 +16,50 @@ import LeagueListCacheModel from '@/models/LeagueListCache';
 const FOOTBALL_API_URL = 'https://v3.football.api-sports.io';
 const FOOTBALL_API_KEY = process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
 
-export const fetchAllPlayersInLeague = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
+// lib/api.ts
+export const fetchAllTeamsInLeagues = async (
+  leagueIds: string[],
+  season: string = "2024"
+): Promise<Array<{ id: number; name: string; logo: string }>> => {
   if (!FOOTBALL_API_KEY) return [];
+  const reqs = leagueIds.map((id) =>
+    fetch(`${FOOTBALL_API_URL}/teams?league=${id}&season=${season}`, { ...footballServerOptions, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { response: [] }))
+  );
+  const results = await Promise.all(reqs);
+  const all = results.flatMap((r) => r.response ?? []);
+  const map = new Map<number, { id: number; name: string; logo: string }>();
+  for (const t of all) map.set(t.team.id, { id: t.team.id, name: t.team.name, logo: t.team.logo });
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+};
 
-  try {
-    const teamsResponse = await fetch(
-      `${FOOTBALL_API_URL}/teams?league=${leagueId}&season=${season}`,
-      { ...footballServerOptions, cache: 'no-store' }
-    );
-
-    if (!teamsResponse.ok) {
-      console.error('Failed to fetch teams');
-      return [];
-    }
-
-    const teamsData = await teamsResponse.json();
-    const teams = teamsData.response || [];
-
-    if (teams.length === 0) return [];
-
-    const allSquadPromises = teams.map((team: any) =>
-        fetch(
-          `${FOOTBALL_API_URL}/players/squads?team=${team.team.id}`,
-          { ...footballServerOptions, cache: 'no-store' }
-        ).then(res => res.json())
-    );
-
-    const allSquadResults = await Promise.all(allSquadPromises);
-
-    let allPlayers: any[] = [];
-    allSquadResults.forEach((squadResult, index) => {
-        const teamInfo = teams[index].team;
-        const players = squadResult.response?.[0]?.players || [];
-        const playersWithTeamInfo = players.map((player: any) => ({
-            ...player,
-            team: { id: teamInfo.id, name: teamInfo.name, logo: teamInfo.logo }
+export const fetchAllPlayersInLeagues = async (
+  leagueIds: string[],
+  season: string = "2024"
+): Promise<any[]> => {
+  if (!FOOTBALL_API_KEY) return [];
+  const teamReqs = leagueIds.map((id) =>
+    fetch(`${FOOTBALL_API_URL}/teams?league=${id}&season=${season}`, { ...footballServerOptions, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { response: [] }))
+  );
+  const teamResults = await Promise.all(teamReqs);
+  const teams = teamResults.flatMap((r) => r.response ?? []);
+  if (teams.length === 0) return [];
+  const squadReqs = teams.map((t: any) =>
+    fetch(`${FOOTBALL_API_URL}/players/squads?team=${t.team.id}`, { ...footballServerOptions, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { response: [] }))
+      .then((s) => {
+        const players = s.response?.[0]?.players ?? [];
+        return players.map((p: any) => ({
+          ...p,
+          team: { id: t.team.id, name: t.team.name, logo: t.team.logo },
         }));
-        allPlayers = [...allPlayers, ...playersWithTeamInfo];
-    });
+      })
+  );
+  const squads = await Promise.all(squadReqs);
+  return squads.flat().sort((a, b) => a.name.localeCompare(b.name));
+};
 
-    allPlayers.sort((a, b) => a.name.localeCompare(b.name));
-
-    return allPlayers;
-
-  } catch (error) {
-    console.error("Error in fetchAllPlayersInLeague:", error);
-    return [];
-  }
-});
 
 export const fetchInjuriesFromApi = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
     if (!FOOTBALL_API_KEY) return [];

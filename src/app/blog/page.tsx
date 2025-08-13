@@ -17,10 +17,57 @@ import { NewsArticleSummary } from '@/lib/types';
 
 export const revalidate = 3600;
 
+// --- METADATA OBJECT UPDATED ---
 export const metadata: Metadata = {
   title: 'Latest Sports News & Analysis | TLiveScores Blog',
   description: 'Explore in-depth articles, match previews, and expert analysis on football, basketball, boxing, and more.',
-  alternates: { canonical: 'https://todaylivescores.com/blog' },
+  
+  // ADDED: Keywords for better SEO targeting
+  keywords: [
+    'sports blog', 'football analysis', 'match previews', 'basketball insights', 
+    'expert sports commentary', 'live scores blog', 'transfer news', 'sports articles'
+  ],
+
+  // ADDED: Author and Publisher for brand consistency
+  authors: [{ name: 'TodayLiveScores' }],
+  publisher: 'TodayLiveScores',
+
+  // ADDED: Explicit instructions for search engine crawlers
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  // FIXED: Canonical URL is now under the 'alternates' key
+  alternates: {
+    canonical: 'https://todaylivescores.com/blog',
+  },
+
+  // ADDED: Open Graph metadata for social sharing (Facebook, etc.)
+  openGraph: {
+    title: 'Latest Sports News & Analysis | TLiveScores Blog',
+    description: 'Explore in-depth articles, match previews, and expert analysis on football, basketball, boxing, and more.',
+    url: 'https://todaylivescores.com/blog',
+    siteName: 'TodayLiveScores',
+    images: [
+      {
+        url: 'https://todaylivescores.com/social-card-blog.png', // IMPORTANT: Create a 1200x630px image for this
+        width: 1200,
+        height: 630,
+        alt: 'The TodayLiveScores Blog logo with sports imagery.',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+
+  // ADDED: Twitter-specific metadata for sharing on X
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Latest Sports News & Analysis | TLiveScores Blog',
+    description: 'Explore in-depth articles, match previews, and expert analysis on football, basketball, boxing, and more.',
+    images: ['https://todaylivescores.com/social-card-blog.png'], // Must be the same image as openGraph
+  },
 };
 
 const formatDateForNews = (dateString: string | null | undefined): string => {

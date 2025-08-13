@@ -1,11 +1,12 @@
-import type { Metadata } from 'next'; // Added for type safety
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script'; // --- 1. IMPORT SCRIPT ---
 import './globals.css';
 import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// --- 1. Defined your schema data in a constant ---
+// --- 2. DEFINE YOUR SCHEMA DATA (this part is good) ---
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": ["Organization", "Place"],
@@ -13,7 +14,7 @@ const jsonLd = {
   "url": "https://todaylivescores.com/",
   "logo": {
     "@type": "ImageObject",
-    "url": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb483e99aef.png",
+    "url": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb4883e99aef.png",
     "contentUrl": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb483e99aef.png"
   },
   "sameAs": [
@@ -23,7 +24,7 @@ const jsonLd = {
     "https://za.pinterest.com/todaylivescores/",
     "https://medium.com/@todaylivescoressa"
   ],
-  "description": "Todaylivescores has grown into a powerhouse for real-time sports coverage since its launch. It delivers instantaneous live scores, fixtures, results, standings, and in-depth match data for football, cricket, tennis, basketball, and hockey across world-class leagues and tournaments. The platform engages thousands of users monthly across 20+ popular leagues worldwide, forming a central hub for sports fans. Through the Todaylivescores app and web, users experience a seamless interface with fast updates, notifications, updated content, and synergy across media and betting systems.",
+  "description": "Todaylivescores has grown into a powerhouse for real-time sports coverage...",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "19 Oakworth Rd, South End",
@@ -34,14 +35,10 @@ const jsonLd = {
   "hasMap": "https://www.google.com/maps/place/19+Oakworth+Rd,+South+End,+Gqeberha,+6001,+South+Africa/"
 };
 
-// --- 2. Updated the metadata object ---
+// --- 3. REMOVE THE SCHEMA FROM THE METADATA OBJECT ---
 export const metadata: Metadata = {
   title: 'TodayLiveScores',
   description: 'Your go-to for live scores, stats, news and blogs.',
-  // 3. Added the schema using the 'other' property
-  other: {
-    'application/ld+json': JSON.stringify(jsonLd),
-  },
 };
 
 export default function RootLayout({
@@ -51,6 +48,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      {/* --- 4. ADD THE SCRIPT COMPONENT TO THE <head> --- */}
+      <head>
+        <Script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={inter.className}>
         <NextTopLoader
           color="#3b82f6"

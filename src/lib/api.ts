@@ -16,54 +16,39 @@ import LeagueListCacheModel from '@/models/LeagueListCache';
 const FOOTBALL_API_URL = 'https://v3.football.api-sports.io';
 const FOOTBALL_API_KEY = process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
 
-export const fetchAllPlayersInLeague = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
-  if (!FOOTBALL_API_KEY) return [];
+export const fetchTeamsAndPlayersInLeagues = async (
+  leagueIds: string[],
+  season: string = "2024"
+): Promise<{ teams: Array<{ id: number; name: string; logo: string }>; players: any[] }> => {
+  if (!FOOTBALL_API_KEY) return { teams: [], players: [] };
 
-  try {
-    const teamsResponse = await fetch(
-      `${FOOTBALL_API_URL}/teams?league=${leagueId}&season=${season}`,
-      { ...footballServerOptions, cache: 'no-store' }
-    );
+  const teamResponses = await Promise.all(
+    leagueIds.map(id =>
+      fetch(`${FOOTBALL_API_URL}/teams?league=${id}&season=${season}`, { ...footballServerOptions, cache: "no-store" })
+        .then(r => (r.ok ? r.json() : { response: [] }))
+    )
+  );
 
-    if (!teamsResponse.ok) {
-      console.error('Failed to fetch teams');
-      return [];
-    }
+  const teams = teamResponses
+    .flatMap(r => r.response ?? [])
+    .map(t => ({ id: t.team.id, name: t.team.name, logo: t.team.logo }));
 
-    const teamsData = await teamsResponse.json();
-    const teams = teamsData.response || [];
+  const squadResponses = await Promise.all(
+    teams.map(t =>
+      fetch(`${FOOTBALL_API_URL}/players/squads?team=${t.id}`, { ...footballServerOptions, cache: "no-store" })
+        .then(r => (r.ok ? r.json() : { response: [] }))
+        .then(s => s.response?.[0]?.players.map(p => ({ ...p, team: t })) ?? [])
+    )
+  );
 
-    if (teams.length === 0) return [];
+  const players = squadResponses.flat();
 
-    const allSquadPromises = teams.map((team: any) =>
-        fetch(
-          `${FOOTBALL_API_URL}/players/squads?team=${team.team.id}`,
-          { ...footballServerOptions, cache: 'no-store' }
-        ).then(res => res.json())
-    );
+  return {
+    teams: teams.sort((a, b) => a.name.localeCompare(b.name)),
+    players: players.sort((a, b) => a.name.localeCompare(b.name)),
+  };
+};
 
-    const allSquadResults = await Promise.all(allSquadPromises);
-
-    let allPlayers: any[] = [];
-    allSquadResults.forEach((squadResult, index) => {
-        const teamInfo = teams[index].team;
-        const players = squadResult.response?.[0]?.players || [];
-        const playersWithTeamInfo = players.map((player: any) => ({
-            ...player,
-            team: { id: teamInfo.id, name: teamInfo.name, logo: teamInfo.logo }
-        }));
-        allPlayers = [...allPlayers, ...playersWithTeamInfo];
-    });
-
-    allPlayers.sort((a, b) => a.name.localeCompare(b.name));
-
-    return allPlayers;
-
-  } catch (error) {
-    console.error("Error in fetchAllPlayersInLeague:", error);
-    return [];
-  }
-});
 
 export const fetchInjuriesFromApi = cache(async (leagueId: string, season: string = "2024"): Promise<any[]> => {
     if (!FOOTBALL_API_KEY) return [];

@@ -1,5 +1,6 @@
 // src/app/admin/injuries/create/page.tsx
-import { fetchAllPlayersInLeagues, fetchAllTeamsInLeagues, fetchInjuriesFromApi, fetchTransfersFromApi } from "@/lib/api";
+import { fetchTeamsAndPlayersInLeagues } from "@/lib/api";
+import { fetchInjuriesFromApi, fetchTransfersFromApi } from "@/lib/api";
 import InjuryModel, { IInjury } from "@/models/Injury";
 import TransferModel, { ITransfer } from "@/models/Transfer";
 import InjuriesTable from "@/components/InjuriesTable";
@@ -13,21 +14,65 @@ const leagueIds = ["39", "78"];
 
 export default async function ManagementPage() {
   await dbConnect();
-  const [players, teams, manualInjuries, apiInjuriesResponse, manualTransfers, apiTransfersResponse] = await Promise.all([
-    fetchAllPlayersInLeagues(leagueIds, "2024"),
-    fetchAllTeamsInLeagues(leagueIds, "2024"),
+
+  const [teamsPlayersResult, manualInjuries, apiInjuriesResponse, manualTransfers] = await Promise.all([
+    fetchTeamsAndPlayersInLeagues(leagueIds, "2024"),
     InjuryModel.find({}).sort({ lastUpdated: -1 }).lean(),
     fetchInjuriesFromApi("39"),
-    TransferModel.find({}).sort({ date: -1 }).lean(),
-    fetchTransfersFromApi("39")
+    TransferModel.find({}).sort({ date: -1 }).lean()
   ]);
 
-  const safePlayers = players || [];
-  const safeTeams = teams || [];
+  const apiTransfersResponses = await Promise.all(leagueIds.map(id => fetchTransfersFromApi(id)));
+  const allApiTransfers = apiTransfersResponses.flat();
+
+  const squadPlayers = teamsPlayersResult.players || [];
+  const teams = teamsPlayersResult.teams || [];
+
+  const playerMap = new Map<string, any>();
+
+  function getKeyByIdOrName(id?: number | null, name?: string | null) {
+    if (id) return `id:${id}`;
+    if (name) return `name:${name.trim().toLowerCase()}`;
+    return null;
+  }
+
+  (squadPlayers || []).forEach(p => {
+    const key = getKeyByIdOrName(p.id, p.name);
+    if (!key) return;
+    playerMap.set(key, { id: p.id, name: p.name, photo: p.photo, team: p.team });
+  });
+
+  (allApiTransfers || []).forEach(t => {
+    const pl = t.player || {};
+    const id = pl.id ?? null;
+    const name = pl.name ?? null;
+    const photo = pl.photo ?? null;
+    const key = getKeyByIdOrName(id, name);
+    if (!key) return;
+    const team = t.transfers?.[0]?.teams?.in || null;
+    const existing = playerMap.get(key);
+    if (existing) {
+      playerMap.set(key, {
+        ...existing,
+        id: existing.id || id,
+        name: existing.name || name,
+        photo: existing.photo || photo,
+        team: existing.team || team
+      });
+    } else {
+      playerMap.set(key, { id, name, photo, team });
+    }
+  });
+
+  const safePlayers = [...playerMap.values()].sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "")
+  );
+
+  const safeTeams = teams;
   const safeManualInjuries = manualInjuries || [];
   const safeApiInjuries = apiInjuriesResponse || [];
   const safeManualTransfers = manualTransfers || [];
-  const safeApiTransfers = apiTransfersResponse || [];
+  const safeApiTransfers = allApiTransfers || [];
 
   const manualInjuryPlayerIds = new Set(safeManualInjuries.map(inj => inj.playerId));
   const automatedInjuries = safeApiInjuries
@@ -68,7 +113,7 @@ export default async function ManagementPage() {
       if (!apiTransfer.transfers || apiTransfer.transfers.length === 0) return null;
       const transferInfo = apiTransfer.transfers[0];
       return {
-        _id: `api-${apiTransfer.player.id}`,
+        _id: `api-${apiTransfer.player.id || apiTransfer.player.name}`,
         playerId: apiTransfer.player.id,
         playerName: apiTransfer.player.name,
         playerPhoto: apiTransfer.player.photo,

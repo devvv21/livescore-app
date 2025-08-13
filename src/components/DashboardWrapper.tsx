@@ -199,7 +199,7 @@ export default function DashboardWrapper({
                 </div>
             )}
             
-            <BannerSlider location="homepage" className="h-100" />
+            <BannerSlider location="homepage" className="h-120" />
        
             <MatchListContainer 
               matches={filteredMatches}

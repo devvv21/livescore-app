@@ -51,7 +51,7 @@ const BannerSlider = ({ location, className }: { location: string, className?: s
         {banners.map(banner => (
           <div className="embla__slide relative h-full" key={banner._id.toString()}>
             <Link href={banner.targetUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-             <div className="relative w-full h-100 rounded-xl overflow-hidden">
+             <div className="relative w-full h-120 rounded-xl overflow-hidden">
                 <Image
                   src={banner.imageUrl.startsWith('http') ? banner.imageUrl : `${baseUrl}${banner.imageUrl}`}
                   alt="Promotional Banner"

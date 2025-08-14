@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
@@ -10,67 +10,78 @@ import './editorjs-custom.css';
 
 interface SelectOption { value: string; label: string; }
 
-// DYNAMIC IMPORTS
 const LoadingSpinner = () => <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>;
 const FeaturedImageUploader = dynamic(() => import('@/components/FeaturedImageUploader'), { ssr: false });
 const EditorJsComponent = dynamic(() => import('@/components/EditorJsComponent'), { ssr: false, loading: () => <div className="bg-gray-700 rounded-md p-4 min-h-[300px] text-gray-400">Loading Editor...</div> });
 
 const EditorJsPreviewRenderer = ({ data }: { data: OutputData }) => {
-  if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
-    return <div className="p-4 text-gray-400 italic">Start typing...</div>;
-  }
-  return (
-    <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-a:text-blue-400">
-      {data.blocks.map((block: any) => {
-        switch (block.type) {
-          case 'header':
-            const { level, text } = block.data;
-            if (!level || !text) return null;
-            if (level === 1) return <h1 key={block.id}>{text}</h1>;
-            if (level === 2) return <h2 key={block.id}>{text}</h2>;
-            if (level === 3) return <h3 key={block.id}>{text}</h3>;
-            return null;
-          case 'paragraph':
-            return <div key={block.id} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-          case 'image':
-            return (
-              <figure key={block.id}>
-                <img src={block.data.file.url} alt={block.data.caption || 'Image'} className="rounded-lg" />
-                <figcaption>{block.data.caption}</figcaption>
-              </figure>
-            );
-          case 'list':
-            const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
-            return (
-              <ListTag key={block.id}>
-                {block.data.items.map((item: any, index: number) => {
-                  const content = typeof item === 'object' ? item.content : item;
-                  return <li key={index} dangerouslySetInnerHTML={{ __html: content }} />;
-                })}
-              </ListTag>
-            );
-          case 'table':
-            return (
-              <div key={block.id}>
-                <table className="w-full">
-                  <tbody>
-                    {block.data.content.map((row: string[], rIndex: number) => (
-                      <tr key={rIndex}>
-                        {row.map((cell: string, cIndex: number) => (
-                          <td key={cIndex} dangerouslySetInnerHTML={{ __html: cell }} />
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            );
-          default:
-            return null;
-        }
-      })}
-    </div>
-  );
+    if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
+        return <div className="p-4 text-gray-400 italic">Start typing...</div>;
+    }
+    return (
+        <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-a:text-blue-400">
+            {data.blocks.map((block: any) => {
+                switch (block.type) {
+                    case 'header':
+                        const { level, text } = block.data;
+                        if (!level || !text) return null;
+                        if (level === 1) return <h1 key={block.id} className="mb-4 text-4xl font-bold">{text}</h1>;
+                        if (level === 2) return <h2 key={block.id} className="mb-3 text-3xl font-bold">{text}</h2>;
+                        if (level === 3) return <h3 key={block.id} className="mb-2 text-2xl font-bold">{text}</h3>;
+                        if (level === 4) return <h4 key={block.id} className="mb-2 text-xl font-bold">{text}</h4>;
+                        if (level === 5) return <h5 key={block.id} className="mb-2 text-lg font-bold">{text}</h5>;
+                        if (level === 6) return <h6 key={block.id} className="mb-2 text-base font-bold">{text}</h6>;
+                        return null;
+                    case 'paragraph':
+                        return <div key={block.id} className="mb-4" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+                    case 'image':
+                        return (
+                            <figure key={block.id} className="mb-4">
+                                <img src={block.data.file.url} alt={block.data.caption || 'Image'} className="rounded-lg" />
+                                <figcaption>{block.data.caption}</figcaption>
+                            </figure>
+                        );
+                    case 'list':
+                        const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
+                        return (
+                            <ListTag key={block.id} className="mb-4">
+                                {block.data.items.map((item: any, index: number) => {
+                                    const content = typeof item === 'object' ? item.content : item;
+                                    return <li key={index} dangerouslySetInnerHTML={{ __html: content }} />;
+                                })}
+                            </ListTag>
+                        );
+                    case 'table':
+                        return (
+                            <div key={block.id} className="mb-4">
+                                <table className="w-full">
+                                    <thead>
+                                        {block.data.withHeadings && block.data.content[0] ? (
+                                            <tr className="bg-gray-700 text-gray-300">
+                                                {block.data.content[0].map((heading: string, hIndex: number) => (
+                                                    <th key={hIndex} className="p-2 border border-gray-600 font-semibold" dangerouslySetInnerHTML={{ __html: heading }} />
+                                                ))}
+                                            </tr>
+                                        ) : null}
+                                    </thead>
+                                    <tbody>
+                                        {block.data.content.slice(block.data.withHeadings ? 1 : 0).map((row: string[], rIndex: number) => (
+                                            <tr key={rIndex}>
+                                                {row.map((cell: string, cIndex: number) => (
+                                                    <td key={cIndex} className="p-2 border border-gray-600" dangerouslySetInnerHTML={{ __html: cell }} />
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        );
+                    default:
+                        return null;
+                }
+            })}
+        </div>
+    );
 };
 
 const PublishedPostsTable = ({ posts, isLoading, onEdit, onDelete }: { posts: IPost[], isLoading: boolean, onEdit: (post: IPost) => void, onDelete: (id: string) => void }) => (
@@ -106,7 +117,6 @@ const PublishedPostsTable = ({ posts, isLoading, onEdit, onDelete }: { posts: IP
         </div>
     </div>
 );
-
 
 const CreatePostPage = () => {
     const [posts, setPosts] = useState<IPost[]>([]);
@@ -162,7 +172,7 @@ const CreatePostPage = () => {
         setKeywords(Array.isArray(post.keywords) ? post.keywords.join(', ') : '');
         setFeaturedImageUrl(post.featuredImageUrl || '');
         setContent(post.content as OutputData);
-        setEditorKey(Date.now()); // This forces the editor to re-mount with the new data
+        setEditorKey(Date.now());
         const postCategoryIds = (post.categories as any[]).map(c => typeof c === 'string' ? c : c._id.toString());
         const postTagIds = (post.tags as any[]).map(t => typeof t === 'string' ? t : t._id.toString());
         setSelectedCategories(allCategories.filter(opt => postCategoryIds.includes(opt.value)));
@@ -229,8 +239,8 @@ const CreatePostPage = () => {
                     {editingPostId && (<button onClick={resetForm} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">New Post</button>)}
                 </div>
                 {formError && <div className="mb-4 p-3 rounded bg-red-800 text-white"><p className="font-bold">Error</p><p>{formError}</p></div>}
-                <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex flex-col lg:flex-row lg:gap-8">
+                    <form onSubmit={handleSubmit} className="w-full lg:w-1/2 space-y-6">
                         <div className="p-4 bg-gray-800 rounded-lg space-y-4">
                             <h2 className="text-xl font-semibold">Post Details</h2>
                             <div><label className="block text-sm mb-1">Title</label><input type="text" value={title} onChange={handleTitleChange} required className="w-full p-2 rounded bg-gray-700 border-gray-600" /></div>
@@ -248,7 +258,7 @@ const CreatePostPage = () => {
                         </div>
                         <button type="submit" disabled={isSubmitting} className="w-full bg-green-600 hover:bg-green-700 font-bold py-3 rounded text-lg disabled:bg-gray-500">{isSubmitting ? 'Saving...' : (editingPostId ? 'Update Post' : 'Publish Post')}</button>
                     </form>
-                    <div className="p-4 bg-gray-800 rounded-lg mt-8 lg:mt-0">
+                    <div className="w-full lg:w-1/2 p-4 bg-gray-800 rounded-lg mt-8 lg:mt-0">
                         <h2 className="text-xl font-semibold mb-4">Live Preview</h2>
                         <div className="p-4 border border-gray-700 rounded-md min-h-[200px]">
                             <EditorJsPreviewRenderer data={content} />

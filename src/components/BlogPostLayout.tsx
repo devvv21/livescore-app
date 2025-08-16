@@ -35,8 +35,8 @@ const TableOfContents = ({ contentBlocks }: { contentBlocks?: IContentBlock[] | 
   };
 
   return (
-    <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700">
-      <p className="text-lg font-bold text-white mb-3">Table of Contents</p>
+    <div className="p-4 bg-[#2b3341] rounded-lg border border-gray-700 space-y-4">
+      <p className="text-lg font-bold text-white">Table of Contents</p>
       <ul className="space-y-2">
         {headings.map((heading, index) => (
           <li key={index} style={{ marginLeft: `${(heading.level - 2) * 1}rem` }}>
@@ -122,11 +122,11 @@ const PostRenderer = ({ contentBlocks }: { contentBlocks?: IContentBlock[] | nul
           case 'header':
             const { level, text } = block.data;
             if (!text || !level || level === 1) return null;
-            if (level === 2) return <h2 key={block.id} id={id} className="text-3xl font-bold mt-10" dangerouslySetInnerHTML={{ __html: text }} />;
-            if (level === 3) return <h3 key={block.id} id={id} className="text-2xl font-semibold mt-8" dangerouslySetInnerHTML={{ __html: text }} />;
+            if (level === 2) return <h2 key={block.id} id={id} className="text-3xl font-bold mt-10 mb-4" dangerouslySetInnerHTML={{ __html: text }} />;
+            if (level === 3) return <h3 key={block.id} id={id} className="text-2xl font-semibold mt-8 mb-3" dangerouslySetInnerHTML={{ __html: text }} />;
             return null;
           case 'paragraph':
-            return <div key={block.id} className="text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+            return <div key={block.id} className="text-lg leading-relaxed mb-6" dangerouslySetInnerHTML={{ __html: block.data.text }} />;
           case 'image':
             const imageUrl = block.data.file.url.startsWith('http') ? block.data.file.url : `${publicDomain}${block.data.file.url}`;
             return (
@@ -139,13 +139,13 @@ const PostRenderer = ({ contentBlocks }: { contentBlocks?: IContentBlock[] | nul
             const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
             const listStyle = block.data.style === 'ordered' ? 'list-decimal' : 'list-disc';
             return (
-              <ListTag key={block.id} className={`${listStyle} pl-5 space-y-2 my-4`}>
+              <ListTag key={block.id} className={`${listStyle} pl-5 space-y-2 my-4 mb-6`}>
                 {block.data.items.map((item: any, index: number) => (<ListItemRenderer key={index} item={item} />))}
               </ListTag>
             );
           case 'table':
             return (
-              <div key={block.id} className="my-6 overflow-x-auto">
+              <div key={block.id} className="my-6 mb-8 overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   {block.data.withHeadings && (
                     <thead>

@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script'; // --- 1. IMPORT SCRIPT ---
+import Script from 'next/script';
 import './globals.css';
 import NextTopLoader from 'nextjs-toploader';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// --- 2. DEFINE YOUR SCHEMA DATA (this part is good) ---
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": ["Organization", "Place"],
@@ -15,7 +14,7 @@ const jsonLd = {
   "logo": {
     "@type": "ImageObject",
     "url": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb4883e99aef.png",
-    "contentUrl": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb483e99aef.png"
+    "contentUrl": "https://i.postimg.cc/vBwqK79Z/1c9c4eee-7e94-423c-a5b1-4bb4883e99aef.png"
   },
   "sameAs": [
     "https://www.facebook.com/todaylivescoresofficial/",
@@ -35,10 +34,12 @@ const jsonLd = {
   "hasMap": "https://www.google.com/maps/place/19+Oakworth+Rd,+South+End,+Gqeberha,+6001,+South+Africa/"
 };
 
-// --- 3. REMOVE THE SCHEMA FROM THE METADATA OBJECT ---
 export const metadata: Metadata = {
   title: 'TodayLiveScores',
   description: 'Your go-to for live scores, stats, news and blogs.',
+  verification: {
+    google: 'LqdVs--mvSHt7f_tp-EYMYyR0UmrbdDIwLr05dwqAFo',
+  },
 };
 
 export default function RootLayout({
@@ -48,7 +49,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      {/* --- 4. ADD THE SCRIPT COMPONENT TO THE <head> --- */}
       <head>
         <Script
           id="organization-schema"
@@ -69,6 +69,13 @@ export default function RootLayout({
           shadow="0 0 10px #3b82f6,0 0 5px #3b82f6"
         />
         {children}
+
+        <Script
+          id="ahrefs-analytics"
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="htKYi2l25Bsq/BIUvv5dZw"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
